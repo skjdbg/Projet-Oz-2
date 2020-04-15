@@ -11,7 +11,7 @@ define
         of H|T then
             % we are not certain Input.nbPlayers is equal to the number of players in Input.players
             % hence the if which looks redundant
-            if Id <= Input.nbPlayers then
+            if Id =< Input.nbPlayer then
                 % TODO: how do we chose Color ?
                 % threads because why not
                 thread {PlayerManager.playerGenerator H Color Id} end|{PlayerMaker Id+1}
@@ -34,7 +34,7 @@ define
             case S
             of H|T then
                 {Wait H}
-                {SumN N-1 T}
+                {WaitForN N-1 T}
             end
         else
             skip
@@ -54,7 +54,7 @@ in
             {Send PlayersInitPort 1}
         end
     end
-    {WaitForN Input.nbPlayers PlayersInitStream}
+    {WaitForN Input.nbPlayer PlayersInitStream}
 
     % Launch game ... how ?
 end
