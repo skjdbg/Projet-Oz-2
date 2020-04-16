@@ -9,7 +9,7 @@ define
    InitPosition
    FindElem
 in
-    proc{TreatStream Stream IDPlayer Pos}
+    proc{TreatStream Stream IDPlayer Pos Path Life isDive}
        case Stream
        of nil then skip
 
@@ -22,15 +22,21 @@ in
 	  %Choose random position in the grid to begin
 	  Position = {InitPosition}
 	  
-	  {TreatStream T IDPlayer Position}
+	  {TreatStream T IDPlayer Position Position|nil Input.maxDamage false}
 
        [] move(?ID ?Position ?Direction)|T then
-	  %TODO
-	  skip
+	  
+	  %stay alive ?
+	  if (Life == 0) then
+	     {TreatStream T null null null 0 isDive}
+	     
+	  else
+	     ID = IDPlayer
+	     %TODO
+	  end
 
        [] dive|T then
-	  %TODO
-	  skip
+	  {TreatStream T IDPlayer Position Path Life true}
 
        [] chargeItem(?ID ?KindItem)|T then
 	  %TODO
@@ -45,61 +51,23 @@ in
 	  skip
 
        [] isDead(?Answer)|T then
-	  %TODO
-	  skip
-
-       [] sayMove(ID Direction)|T then
-	  %TODO
-	  skip
-	  
-       [] saySurface(ID)|T then
-	  %TODO
-	  skip
-
-       [] sayCharge(ID KindItem)|T then
-	  %TODO
-	  skip
-
-       [] sayMinePlaced(ID)|T then
-	  %TODO
-	  skip
-	  
-       [] sayMissileExplode(ID Position ?Message)|T then
-	  %TODO
-	  skip
+	  if (Life == 0) then
+	     Answer = true
+	  else
+	     Answer = false
+	  end
+	  {TreatStream T IDPlayer Pos Path Life isDive}
 
        [] sayMineExplode(ID Position ?Message)|T then
 	  %TODO
 	  skip
+
+       %The RandomPlayer ignore SayMove, SaySurface, SayCharge, SayMinePlaced, SayMissileExplode, SayPassingDrone, SayAnswerDrone, SayPassingSonar, SayAnswerSonar, SayDeath and SayDamageTaken
+       %These ignored case therefore enter in basic case
 	  
-       [] sayPassingDrone(Drone ?ID ?Answer)|T then
-	  %TODO
-	  skip
-
-       [] sayAnswerDrone(Drone ID Answer)|T then
-	  %TODO
-	  skip
-
-       [] sayPassingSonar(?ID ?Answer)|T then
-	  %TODO
-	  skip
-
-       [] sayAnswerSonar(ID Answer)|T then
-	  %TODO
-	  skip
-
-       [] sayDeath(ID)|T then
-	  %TODO
-	  skip
-
-       [] sayDamageTaken(ID Damage LifeLeft)|T then
-	  %TODO
-	  skip
-
-
        %basic case
        [] _|T then
-	  {TreatStream T IDPlayer Pos}
+	  {TreatStream T IDPlayer Pos Path Life isDive}
        end
        
     end
@@ -158,7 +126,7 @@ in
 
        % initialise Random Player
        thread
-	  {TreatStream Stream id(id:ID color:Color name:"AIRandom") pt(x:0 y:0)}
+	  {TreatStream Stream id(id:ID color:Color name:"AIRandom") pt(x:0 y:0) nil 0 false}
        end
 
        %return
