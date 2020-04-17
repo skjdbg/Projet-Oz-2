@@ -126,15 +126,11 @@ define
                         {Broadcast PL Ans}
                     end
                 end
-                {BroadcastMissExp T Id MinePos}
+                {BroadcastMineExp T Id MinePos}
             [] nil then
                 skip
             end
         end
-
-        % P => Port
-        % Ans => answers to check
-        fun {ReturnValidAnswers P Ans}
 
         % Port => this submarine's port
         % EPL => List of the ennemies' port
