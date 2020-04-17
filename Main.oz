@@ -51,76 +51,155 @@ define
     end
 
     proc {RunTurnByTurn PlayerPorts GUI}
-        proc {HandlePlayer Port DiveStatus}
-            case DiveStatus 
-            of surface(N) then
-                if N >= 0 then
-                    {HandlePlayer Port surface(N-1)}
-                else
-                    Id Pos Dir
-                in
-                    {Send Port dive}
-                    {Send Port move(Id Pos Dir)}
-                    {Wait Id}
-                    {Wait Pos}
-                    {Wait Dir}
-                    case Dir
-                    of surface then
-                        % Player has chosen to make surface => make him skip Input.turnSurface turns (including this one)
-                        % TODO: broadcast to other players saySurface(Id)
-                        {Send GUI surface(Id)}
-                        {HandlePlayer Port surface(Input.turnSurface - 2)}
+        proc {Broadcast PL Msg}
+            for P in PL do
+                {Send P Msg}
+            end
+        end
+
+        proc {BroadcastMissExp PL Id MissPos}
+            case PL
+            of P|T then
+                Ans
+            in
+                thread
+                    {Send P sayMissileExplode(Id MissPos Ans)}
+                    {Wait Ans}
+                    case Ans
+                    of null then skip
                     else
-                        IdCharge ItemKind
-                        IdFire FireKind
-                        IdMine Mine
-                    in
-                        %TODO: broadcast to other players sayMove(Id Dir)
-                        {Send GUI movePlayer(Id Pos)}
-                        {Send Port chargeItem(IdCharge ItemKind)}
-                        {Wait IdCharge}
-                        {Wait ItemKind}
-
-                        %TODO: find a way to implement this
-                        if ItemKind \= null then   (means "if an item was produced")   =
-                            %TODO: broadcast to other players sayCharge(IdCharge ItemKind)
-                        end
-
-                        {Send Port fireItem(IdFire FireKind)}
-                        {Wait IdFire}
-                        {Wait FireKind}
-                        case FireKind
-                        of mine(Pos) then
-                            %TODO: broadcast to other players sayMinePlaced(IdFire)
-                        [] missile(PosMiss) then
-                            %TODO: broadcast to other players sayMissileExplode(IdFire PosMiss ?Message)
-                            %TODO: broadcast to other players Message if any
-                        [] drone() then
-                            %TODO: broadcast to other players sayPassingDrone(Drone ?ID ?Answer)
-                            %TODO: and send every answer to the player: sayAnswerDrone(Drone Id Answer)
-                        [] sonar then
-                            %TODO: broadcast to every(?) player sayPassingSonar(?Id ?Answer)
-                            %TODO: and send answers back: sayAnswerSonar(Id Answer)
-                        [] _ then  % includes the "null" case
-                            skip
-                        end
-
-                        {Send Port fireMine(IdMine Mine)}
-                        {Wait IdMine}
-                        {Wait Mine}
-                        case Mine
-                        of null then
-                            skip
-                        else
-                            %TODO: broadcast to other players sayMineExplode(IdMine Mine ?Message)
-                            %TODO: broadcast to other players Message if any
-                        end
-                        {HandlePlayer Port DiveStatus}
+                        {Broadcast PL Ans}
                     end
                 end
+                {BroadcastMissExp T Id MissPos}
+            [] nil then
+                skip
+            end
+        end
+
+        proc {BroadcastDrone PL PAns Drone}
+            case PL
+            of P|T then
+                Id Ans
+            in
+                thread
+                    {Send P sayPassingDrone(Drone Id Ans)}
+                    {Wait Id}
+                    {Wait Ans}
+                    {Send PAns sayAnswerDrone(Drone Id Ans)}
+                end
+                {BroadcastDrone T PAns Drone}
+            [] nil then
+                skip
+            end
+        end
+
+        proc {BroadcastSonar PL PAns}
+            case PL
+            of P|T then
+                Id Ans
+            in
+                thread
+                    {Send P sayPassingSonar(Id Ans)}
+                    {Wait Id}
+                    {Wait Ans}
+                    {Send PAns sayAnswerSonar(Id Ans)}
+                end
+                {BroadcastDrone T PAns}
+            [] nil then
+                skip
+            end
+
+        end
+
+        proc {BroadcastMineExp PL Id MinePos}
+            case PL
+            of P|T then
+                Ans
+            in
+                thread
+                    {Send P sayMineExplode(Id MinePos Ans)}
+                    {Wait Ans}
+                    case Ans
+                    of null then skip
+                    else
+                        {Broadcast PL Ans}
+                    end
+                end
+                {BroadcastMissExp T Id MinePos}
+            [] nil then
+                skip
+            end
+        end
+
+        % P => Port
+        % Ans => answers to check
+        fun {ReturnValidAnswers P Ans}
+
+        % Port => this submarine's port
+        % EPL => List of the ennemies' port
+        % DiveStatus < 1 => the submarine is underwater
+        % DiveStatus > 0 => the submarine has surfaced and has to wait DiveStatus turns
+        proc {HandlePlayer Port EPL DiveStatus}
+            %TODO: Calls to GUI
+            if DiveStatus > 0 then
+                {HandlePlayer Port EPL surface(DiveStatus-1)}
             else
-                {Show "DiveStatus not correct :"}
-                {Show DiveStatus}
+                Id Pos Dir
+            in
+                {Send Port dive}
+                {Send Port move(Id Pos Dir)}
+                {Wait Id}
+                {Wait Pos}
+                {Wait Dir}
+                case Dir
+                of surface then
+                    % Player has chosen to make surface => make him skip Input.turnSurface turns (including this one)
+                    {Broadcast EPL saySurface(Id)}
+                    {Send GUI surface(Id)}
+                    {HandlePlayer Port EPL Input.turnSurface-1}
+                else
+                    IdCharge ItemKind
+                    IdFire FireKind
+                    IdMine Mine
+                in
+                    {Broadcast EPL sayMove(Id Dir)}
+                    {Send GUI movePlayer(Id Pos)}
+                    {Send Port chargeItem(IdCharge ItemKind)}
+                    {Wait IdCharge}
+                    {Wait ItemKind}
+
+                    if ItemKind \= null then
+                        {Broadcast EPL sayCharge(IdCharge ItemKind)}
+                    end
+
+                    {Send Port fireItem(IdFire FireKind)}
+                    {Wait IdFire}
+                    {Wait FireKind}
+                    case FireKind
+                    of mine(Pos) then
+                        {Broadcast EPL sayMinePlaced(IdFire)}
+                    [] missile(PosMiss) then
+                        {BroadcastMissExp PlayerPorts IdFire PosMiss}
+                    [] drone() then
+                        {BroadcastDrone PlayerPorts Port FireKind}
+                    [] sonar then
+                        {BroadcastSonar PlayerPorts Port}
+                    [] _ then  % includes the "null" case
+                        skip
+                    end
+
+                    {Send Port fireMine(IdMine Mine)}
+                    {Wait IdMine}
+                    {Wait Mine}
+                    case Mine
+                    of null then
+                        skip
+                    else
+                        {BroadcastMineExp PlayerPorts IdMine Mine}
+                    end
+                    {HandlePlayer Port EPL DiveStatus}
+                end
             end
         end
     in
