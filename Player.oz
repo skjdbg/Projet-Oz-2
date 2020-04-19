@@ -1,6 +1,7 @@
 functor
 import
    Input
+   OS
 export
    portPlayer:StartPlayer
 define
@@ -262,7 +263,7 @@ in
 	  %count number of 0 in row
 	 NbrZero = {Length {Filter Row (fun {$ Number} Number == 0 end)}}
 	  %if NbZero = 0 choose another row
-	 if (NbrZero = 0) then
+	 if (NbrZero == 0) then
 	    {InitPosition}
 	     
 	 else
