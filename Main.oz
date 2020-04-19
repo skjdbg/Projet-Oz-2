@@ -9,7 +9,7 @@ define
     fun {TakeNth L N}
         if N > 1 then
             case L
-            of H|T then
+            of _|T then
                 {TakeNth T N-1}
             end
         else
@@ -19,14 +19,8 @@ define
     fun {PlayerMaker ListPlayerTypes Id}
         case ListPlayerTypes
         of H|T then
-            % we are not certain Input.nbPlayers is equal to the number of players in Input.players
-            % hence the if which looks redundant
-            if Id =< Input.nbPlayer then
-                % threads because why not
-                thread {PlayerManager.playerGenerator H {TakeNth Input.colors N} Id} end|{PlayerMaker Id+1}
-            else
-                nil
-            end
+            % threads because why not
+            thread {PlayerManager.playerGenerator H {TakeNth Input.colors Id} Id} end|{PlayerMaker T Id+1}
         [] nil then
             nil
         end
@@ -75,8 +69,8 @@ define
             [] nil then
                 skip
             end
-        end
-
+        end        
+        
         proc {BroadcastDrone PL PAns Drone}
             case PL
             of P|T then
@@ -105,7 +99,7 @@ define
                     {Wait Ans}
                     {Send PAns sayAnswerSonar(Id Ans)}
                 end
-                {BroadcastDrone T PAns}
+                {BroadcastSonar T PAns}
             [] nil then
                 skip
             end
@@ -134,8 +128,8 @@ define
 
         % Port => this submarine's port
         % EPL => List of the ennemies' port
-        % DiveStatus < 1 => the submarine is underwater
-        % DiveStatus > 0 => the submarine has surfaced and has to wait DiveStatus turns
+        % DiveStatus == 0 => the submarine is underwater
+        % DiveStatus > 0  => the submarine has surfaced and has to wait DiveStatus turns
         proc {HandlePlayer Port EPL DiveStatus}
             %TODO: Calls to GUI
             if DiveStatus > 0 then
@@ -173,7 +167,7 @@ define
                     {Wait IdFire}
                     {Wait FireKind}
                     case FireKind
-                    of mine(Pos) then
+                    of mine(_) then
                         {Broadcast EPL sayMinePlaced(IdFire)}
                     [] missile(PosMiss) then
                         {BroadcastMissExp PlayerPorts IdFire PosMiss}
@@ -201,12 +195,13 @@ define
     in
         for PP in PlayerPorts do
             {Send PP dive}
-            thread {HandlePlayer PP true} end
+            thread {HandlePlayer PP  PlayerPorts true} end
         end
     end
 
-    proc {RunSimultaneous PlayerPorts}
-
+    proc {RunSimultaneous PlayerPorts GUIPort}
+        % TODO
+        skip
     end
 in
     {Send GUIPort buildWindow}
