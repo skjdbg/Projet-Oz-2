@@ -273,11 +273,11 @@ in
 			{TreatStream T Grid {StateModification Grid ID State RemovePath}}
 		[] removePlayer(ID)|T then
 			{TreatStream T Grid {RemovePlayer Grid ID State}}
-		[] explosion(ID Position)|T then
+		[] explosion(_ _)|T then
 			{TreatStream T Grid State}
-		[] drone(ID Drone)|T then
+		[] drone(_ _)|T then
 			{TreatStream T Grid State}
-		[] sonar(ID)|T then
+		[] sonar(_)|T then
 			{TreatStream T Grid State}
 		[] _|T then
 			{TreatStream T Grid State}
