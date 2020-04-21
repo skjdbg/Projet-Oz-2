@@ -156,7 +156,7 @@ in
 				end
 				{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine}
 
-		[] sayMissileExplode(ID Position ?Message)|T then
+		[] sayMissileExplode(_ Position ?Message)|T then
 		local Dista in
 			% Dista = Distance MissileExplode-PlayerPosition
 			Dista = {Number.abs (Position.x-Pos.x)} + {Number.abs (Position.y-Pos.y)}
@@ -182,7 +182,7 @@ in
 			end
 		end
 
-		[] sayMineExplode(ID Position ?Message)|T then
+		[] sayMineExplode(_ Position ?Message)|T then
 		local Dista in
 			% Dista = Distance MineExplode-PlayerPosition
 			Dista = {Number.abs (Position.x-Pos.x)} + {Number.abs (Position.y-Pos.y)}
@@ -399,7 +399,6 @@ in
 	fun{StartPlayer Color ID}
 		Stream
 		Port
-		PlayerRandom
 		
 	in
 		{NewPort Stream Port}
