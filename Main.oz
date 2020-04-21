@@ -3,7 +3,7 @@ import
     GUI
     Input
     PlayerManager
-    System(showInfo:Print)
+    System(show:Show)
 define
     % iterates over ListPlayerTypes and creates a list of the corresponding players' ports
     % Id is just an accumulator and should start as 1
@@ -140,7 +140,7 @@ define
                         {Broadcast EPL sayMinePlaced(IdFire)}
                     [] missile(PosMiss) then
                         {Send GUI explosion(IdFire PosMiss)}
-                        {BroadcastMissExp EPL IdFire PosMiss}
+                        {BroadcastMissExp EPL IdFire PosMiss GUI}
                     [] drone then
                         {Send GUI drone(IdFire FireKind)}
                         {BroadcastDrone EPL Port FireKind}
@@ -158,7 +158,7 @@ define
                     of null then
                         skip
                     else
-                        {BroadcastMineExp EPL IdMine Mine}
+                        {BroadcastMineExp EPL IdMine Mine GUI}
                         {Send GUI explosion(IdMine Mine)}
                         {Send GUI removeMine(IdMine Mine)}
                     end
@@ -220,26 +220,31 @@ define
         end
     end
 
-    proc {BroadcastMissExp PL Id MissPos}
+    proc {BroadcastMissExp PL Id MissPos GUI}
         case PL
         of P|T then
             Ans
         in
-            thread
-                %{Send P sayMissileExplode(Id MissPos Ans)}
-                %{Wait Ans}
-                %case Ans
-                %of sayDeath(Id) then
-                %    {Broadcast PL Ans}
-                %    {Send GUI removePlayer(Id)}
-                %[] sayDamageTaken(Id _ LifeLeft) then
-                %    {Broadcast PL Ans}
-                %    {Send GUI lifeUpdate(Id LifeLeft)}
-                %else 
-                    skip
-                %end
+            {Show P}
+            {Send P sayMissileExplode(Id MissPos Ans)}
+            {Wait Ans}
+            case Ans
+            of sayDeath(Id) then
+            {Show 'lol3'}
+                {Broadcast PL Ans}
+            {Show 'lol4'}
+                {Send GUI removePlayer(Id)}
+            {Show 'lol5'}
+            [] sayDamageTaken(Id _ LifeLeft) then
+            {Show 'lol6'}
+                {Broadcast PL Ans}
+            {Show 'lol7'}
+                {Send GUI lifeUpdate(Id LifeLeft)}
+            {Show 'lol8'}
+            else 
+                skip
             end
-            {BroadcastMissExp T Id MissPos}
+            {BroadcastMissExp T Id MissPos GUI}
         [] nil then
             skip
         end
@@ -250,12 +255,10 @@ define
         of P|T then
             Id Ans
         in
-            thread
-                {Send P sayPassingDrone(Drone Id Ans)}
-                {Wait Id}
-                {Wait Ans}
-                {Send PAns sayAnswerDrone(Drone Id Ans)}
-            end
+            {Send P sayPassingDrone(Drone Id Ans)}
+            {Wait Id}
+            {Wait Ans}
+            {Send PAns sayAnswerDrone(Drone Id Ans)}
             {BroadcastDrone T PAns Drone}
         [] nil then
             skip
@@ -267,12 +270,10 @@ define
         of P|T then
             Id Ans
         in
-            thread
-                {Send P sayPassingSonar(Id Ans)}
-                {Wait Id}
-                {Wait Ans}
-                {Send PAns sayAnswerSonar(Id Ans)}
-            end
+            {Send P sayPassingSonar(Id Ans)}
+            {Wait Id}
+            {Wait Ans}
+            {Send PAns sayAnswerSonar(Id Ans)}
             {BroadcastSonar T PAns}
         [] nil then
             skip
@@ -280,26 +281,24 @@ define
 
     end
 
-    proc {BroadcastMineExp PL Id MinePos}
+    proc {BroadcastMineExp PL Id MinePos GUI}
         case PL
         of P|T then
             Ans
         in
-            thread
-                %{Send P sayMineExplode(Id MinePos Ans)}
-                %{Wait Ans}
-                %case Ans
-                %of sayDeath(Id) then
-                %    {Broadcast PL Ans}
-                %    {Send GUI removePlayer(Id)}
-                %[] sayDamageTaken(Id _ LifeLeft) then
-                %    {Broadcast PL Ans}
-                %    {Send GUI lifeUpdate(Id LifeLeft)}
-                %else 
-                    skip
-                %end
+            {Send P sayMineExplode(Id MinePos Ans)}
+            {Wait Ans}
+            case Ans
+            of sayDeath(Id) then
+                {Broadcast PL Ans}
+                {Send GUI removePlayer(Id)}
+            [] sayDamageTaken(Id _ LifeLeft) then
+                {Broadcast PL Ans}
+                {Send GUI lifeUpdate(Id LifeLeft)}
+            else 
+                skip
             end
-            {BroadcastMineExp T Id MinePos}
+            {BroadcastMineExp T Id MinePos GUI}
         [] nil then
             skip
         end
