@@ -72,23 +72,6 @@ define
         end
     end
 
-    fun {MyAppend L I}
-        case L
-        of H|T then
-            H|{MyAppend T I}
-        else
-            I|nil
-        end
-    end
-
-    fun {ShiftList L}
-        case L
-        of H|T then
-            {MyAppend T H}
-        [] nil then
-            nil
-        end
-    end
     
     % Port => this submarine's port
     % EPL => List of the ennemies' port
@@ -308,7 +291,6 @@ define
 
     PlayerPorts
     GUIPort
-    Waitt
 in
     PlayerPorts = {PlayerMaker Input.players 1}
     GUIPort = {GUI.portWindow}
@@ -319,6 +301,5 @@ in
     else
         {RunSimultaneous PlayerPorts GUIPort}
     end
-    {Wait Waitt}
     % Launch game ... how ?
 end
