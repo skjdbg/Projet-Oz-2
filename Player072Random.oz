@@ -2,7 +2,7 @@ functor
 import
    Input
    OS
-    System(showInfo:Print)
+   System(showInfo:Print)
 export
    portPlayer:StartPlayer
 define
@@ -35,13 +35,13 @@ in
 		
 			ID = IDPlayer
 			local ListMove in
-					%collect the retrun list of fonction Move ( [direction position path IsDive] )
+				%collect the retrun list of fonction Move ( [direction position path IsDive] )
 				ListMove = {Move Pos Path IsDive}
 				%dir and pos
 				Direction = ListMove.1
 				Position = ListMove.2.1
 
-					%end
+				%end
 				{TreatStream T IDPlayer ListMove.2.1 ListMove.2.2.1 Life ListMove.2.2.2.1 LoadMine LoadMissile ListMine}
 			end
 
@@ -49,7 +49,7 @@ in
 			{TreatStream T IDPlayer Pos Path Life true LoadMine LoadMissile ListMine}
 
 
-			%The Random Player don't use Sonar and Drone (He use only mine and missile)
+		%The Random Player don't use Sonar and Drone (He use only mine and missile)
 		[] chargeItem(?ID ?KindItem)|T then
 			ID = IDPlayer
 			%check loadmine and loadmissile
@@ -65,7 +65,7 @@ in
 				KindItem = missile
 				{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile+1 ListMine}
 
-				%If Missile is charger then charge mine
+			%If Missile is charger then charge mine
 			elseif (LoadMissile == Input.missile) then
 				KindItem = mine
 				{TreatStream T IDPlayer Pos Path Life IsDive LoadMine+1 LoadMissile ListMine}
@@ -121,7 +121,7 @@ in
 					KindFire = mine(RandomPos)
 					{TreatStream T IDPlayer Pos Path Life IsDive 0 LoadMissile RandomPos|ListMine}
 
-					%fire missile
+				%fire missile
 				else	  
 					CorrectPos = {ValidPosItem PosMatrix Pos Input.minDistanceMissile Input.maxDistanceMissile}
 					RandomPos = {Nth CorrectPos (({OS.rand} mod {Length CorrectPos}) +1)}
@@ -254,10 +254,10 @@ in
 		
 		local Row NRow NZero NCol NbrZero in
 		
-			%random row
+		%random row
 		NRow = ({OS.rand} mod Input.nRow) + 1
 		
-			%choose random column (position doesn't contain 1 in Input.Map
+		%choose random column (position doesn't contain 1 in Input.Map
 		Row = {Nth Input.map NRow}
 		
 		%count number of 0 in row
@@ -279,7 +279,7 @@ in
 		end
 	end
 
-		%fonction find the Nth element of a list with condition
+	%fonction find the Nth element of a list with condition
 	fun{FindElem X F C}
 		fun{Aux X I Acc}
 		if I == C then Acc
@@ -405,7 +405,7 @@ in
 
 		% initialise Random Player
 		thread
-			{TreatStream Stream id(id:ID color:Color name:"AIRandom") pt(x:1 y:1) nil Input.maxDamage false 0 0 nil}
+			{TreatStream Stream id(id:ID color:Color name:"AIRandom") pt(x:0 y:0) nil Input.maxDamage false 0 0 nil}
 		end
 
 		%return
