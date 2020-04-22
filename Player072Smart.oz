@@ -230,17 +230,28 @@ in
 
 		%The RandomPlayer ignore SayMove, SaySurface, SayCharge, SayMinePlaced, SayAnswerDrone, SayAnswerSonar, SayDeath and SayDamageTaken
 		%These ignored case therefore enter in basic case
-		
+		[] sayMove(ID Direction) then
+
+		[] saySurface(ID) then
+
+		[] sayCharge(ID KindItem) then
+
+		[] sayMinePlaced(ID) then
+
+		[] sayAnswerDrone(Drone ID Answer) then
+
+		[] sayAnswerSonar(ID Answer) then
+
+		[] sayDeath(ID) then
+
+		[] sayDamageTaken(ID Damage LifeLeft) then
+
 		%basic case
 		[] _|T then
 			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine}
 		end
 		
 	end
-		
-		
-
-
 
 	%fonction for init position
 	fun {InitPosition}
