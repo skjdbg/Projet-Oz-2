@@ -130,7 +130,12 @@ in
 
 						%random is missile
 						[] missile then
-							CorrectPos = {ValidPosItem PosMatrix Pos Input.minDistanceMissile Input.maxDistanceMissile}
+							%no suicide
+							if Input.minDistanceMissile >= 2 then
+								CorrectPos = {ValidPosItem PosMatrix Pos Input.minDistanceMissile Input.maxDistanceMissile}
+							else
+								CorrectPos = {ValidPosItem PosMatrix Pos 2 Input.maxDistanceMissile}
+							end
 							RandomPos = {Nth CorrectPos (({OS.rand} mod {Length CorrectPos}) +1)}
 							KindFire = missile(RandomPos)
 							{TreatStream T IDPlayer Pos Path Life IsDive LoadMine 0 ListMine EPaths EIDs EFound}
@@ -143,9 +148,14 @@ in
 						KindFire = mine(RandomPos)
 						{TreatStream T IDPlayer Pos Path Life IsDive 0 LoadMissile RandomPos|ListMine EPaths EIDs EFound}
 
-						%fire missile
-					else	  
-						CorrectPos = {ValidPosItem PosMatrix Pos Input.minDistanceMissile Input.maxDistanceMissile}
+					%fire missile
+					else
+						%no suicide
+						if Input.minDistanceMissile >= 2 then
+							CorrectPos = {ValidPosItem PosMatrix Pos Input.minDistanceMissile Input.maxDistanceMissile}
+						else
+							CorrectPos = {ValidPosItem PosMatrix Pos 2 Input.maxDistanceMissile}
+						end
 						RandomPos = {Nth CorrectPos (({OS.rand} mod {Length CorrectPos}) +1)}
 						KindFire = missile(RandomPos)
 						{TreatStream T IDPlayer Pos Path Life IsDive LoadMine 0 ListMine EPaths EIDs EFound}
@@ -155,15 +165,18 @@ in
 		[] fireMine(?ID ?Mine)|T then
 			ID = IDPlayer
 
-			%check if ListMine is empty
-			if {Length ListMine} == 0 then
-				Mine = null
-				{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
-			else
-				Mine = {Nth ListMine (({OS.rand} mod {Length ListMine}) +1)}
-				local NewMineList in
-				NewMineList = {List.subtract ListMine Mine}
-				{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile NewMineList EPaths EIDs EFound}
+			local NewListMine in
+				NewListMine = {DistantMine Pos ListMine}
+				%check if ListMine is empty
+				if {Length NewListMine} == 0 then
+					Mine = null
+					{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
+				else
+					Mine = {Nth NewListMine (({OS.rand} mod {Length NewListMine}) +1)}
+					local MineListReturn in
+					MineListReturn = {List.subtract ListMine Mine}
+					{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile MineListReturn EPaths EIDs EFound}
+					end
 				end
 			end
 
@@ -520,10 +533,10 @@ in
 		
 		local Row NRow NZero NCol NbrZero in
 		
-			%random row
+		%random row
 		NRow = ({OS.rand} mod Input.nRow) + 1
 		
-			%choose random column (position doesn't contain 1 in Input.Map
+		%choose random column (position doesn't contain 1 in Input.Map
 		Row = {Nth Input.map NRow}
 		
 		%count number of 0 in row
@@ -545,7 +558,7 @@ in
 		end
 	end
 
-		%fonction find the Nth element of a list with condition
+	%fonction find the Nth element of a list with condition
 	fun {FindElem X F C}
 		fun{Aux X I Acc}
 			if I == C then Acc
@@ -665,6 +678,21 @@ in
 			Acc|{IntList Number Acc+1}
 		end
 	end
+
+	%Filter and substract nearby Mine
+	fun{DistantMine MyPos ListMine}{
+		case ListMine of nil then nil
+		[] pt(x:X y:Y)|T then
+			local Dista in
+				Dista = {Number.abs (X-MyPos.x)} + {Number.abs (Y-MyPos.y)}
+				if (Dista >= 2) then
+					pt(x:X y:Y)|{DistantMine MyPos T}
+				else
+					{DistantMine MyPos T}
+				end
+			end
+		end
+	}
 	
 	%Launch Player
 	fun {StartPlayer Color ID}
