@@ -54,15 +54,15 @@ in
 
 %%%% Style of game %%%%
 
-   IsTurnByTurn = false
+   IsTurnByTurn = true
 
 %%%% Description of the map %%%%
 
    %Genrate random NRow and Ncolumn
    RowMin = 5
-   RowMax = 20
+   RowMax = 10
    ColMin = 5
-   ColMax = 20
+   ColMax = 10
    NRow = (({OS.rand} mod (RowMax - RowMin)) + RowMin)
    NColumn = (({OS.rand} mod (ColMax - ColMin)) + ColMin)
 
@@ -88,8 +88,9 @@ in
 
 
    Map = {RowGenerator NRow}
-
-   /*Map = [[0 0 0 0 0 0 0 0 0 0]
+   /*NRow = 10
+   NColumn = 10
+   Map = [[0 0 0 0 0 0 0 0 0 0]
 	  [0 0 0 0 0 0 0 0 0 0]
 	  [0 0 0 1 1 0 0 0 0 0]
 	  [0 0 1 1 0 0 1 0 0 0]
@@ -102,9 +103,9 @@ in
 
 %%%% Players description %%%%
 
-   NbPlayer = 2
-   Players = [player072random player072random]
-   Colors = [red green]
+   NbPlayer = 3
+   Players = [player player player]
+   Colors = [red green c(155 200 0)]
 
 %%%% Thinking parameters (only in simultaneous) %%%%
 
@@ -117,7 +118,7 @@ in
 
 %%%% Life %%%%
 
-   MaxDamage = 15
+   MaxDamage = 7
 
 %%%% Number of load for each item %%%%
 

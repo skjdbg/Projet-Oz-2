@@ -48,7 +48,6 @@ in
 		[] dive|T then
 			{TreatStream T IDPlayer Pos Path Life true LoadMine LoadMissile ListMine}
 
-
 		%The Random Player don't use Sonar and Drone (He use only mine and missile)
 		[] chargeItem(?ID ?KindItem)|T then
 			ID = IDPlayer
@@ -84,163 +83,161 @@ in
 		[] fireItem(?ID ?KindFire)|T then
 			ID = IDPlayer
 
-		%no ready item
-		if (LoadMine \= Input.mine andthen LoadMissile \= Input.missile) then
-			KindFire = null
-			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine}
-			
-		else
-
-			local KindItem PosMatrix CorrectPos RandomPos in
-
-				%All pos in the map
-				PosMatrix = {AllPosition Input.nRow Input.nColumn Input.nColumn}
+			%no ready item
+			if (LoadMine \= Input.mine andthen LoadMissile \= Input.missile) then
+				KindFire = null
+				{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine}
 				
-				%choose random item
-				if (LoadMine == Input.mine andthen LoadMissile == Input.missile) then
-					KindItem = {Nth [mine missile] (({OS.rand} mod 2) +1)}
-					%random is mine
-					case KindItem of mine then
+			else
+				local KindItem PosMatrix CorrectPos RandomPos in
+					%All pos in the map
+					PosMatrix = {AllPosition Input.nRow Input.nColumn Input.nColumn}
+					
+					%choose random item
+					if (LoadMine == Input.mine andthen LoadMissile == Input.missile) then
+						KindItem = {Nth [mine missile] (({OS.rand} mod 2) +1)}
+						%random is mine
+						case KindItem of mine then
+							CorrectPos = {ValidPosItem PosMatrix Pos Input.minDistanceMine Input.maxDistanceMine}
+							RandomPos = {Nth CorrectPos (({OS.rand} mod {Length CorrectPos}) +1)}
+							KindFire = mine(RandomPos)
+							{TreatStream T IDPlayer Pos Path Life IsDive 0 LoadMissile RandomPos|ListMine}
+
+						%random is missile
+						[] missile then
+							CorrectPos = {ValidPosItem PosMatrix Pos Input.minDistanceMissile Input.maxDistanceMissile}
+							RandomPos = {Nth CorrectPos (({OS.rand} mod {Length CorrectPos}) +1)}
+							KindFire = missile(RandomPos)
+							{TreatStream T IDPlayer Pos Path Life IsDive LoadMine 0 ListMine}
+						end
+
+					%fire mine
+					elseif (LoadMine == Input.mine) then
 						CorrectPos = {ValidPosItem PosMatrix Pos Input.minDistanceMine Input.maxDistanceMine}
 						RandomPos = {Nth CorrectPos (({OS.rand} mod {Length CorrectPos}) +1)}
 						KindFire = mine(RandomPos)
 						{TreatStream T IDPlayer Pos Path Life IsDive 0 LoadMissile RandomPos|ListMine}
 
-					%random is missile
-					[] missile then
+					%fire missile
+					else	  
 						CorrectPos = {ValidPosItem PosMatrix Pos Input.minDistanceMissile Input.maxDistanceMissile}
 						RandomPos = {Nth CorrectPos (({OS.rand} mod {Length CorrectPos}) +1)}
 						KindFire = missile(RandomPos)
 						{TreatStream T IDPlayer Pos Path Life IsDive LoadMine 0 ListMine}
 					end
-
-				%fire mine
-				elseif (LoadMine == Input.mine) then
-					CorrectPos = {ValidPosItem PosMatrix Pos Input.minDistanceMine Input.maxDistanceMine}
-					RandomPos = {Nth CorrectPos (({OS.rand} mod {Length CorrectPos}) +1)}
-					KindFire = mine(RandomPos)
-					{TreatStream T IDPlayer Pos Path Life IsDive 0 LoadMissile RandomPos|ListMine}
-
-				%fire missile
-				else	  
-					CorrectPos = {ValidPosItem PosMatrix Pos Input.minDistanceMissile Input.maxDistanceMissile}
-					RandomPos = {Nth CorrectPos (({OS.rand} mod {Length CorrectPos}) +1)}
-					KindFire = missile(RandomPos)
-					{TreatStream T IDPlayer Pos Path Life IsDive LoadMine 0 ListMine}
 				end
 			end
-		end
 		
 		
 
 		[] fireMine(?ID ?Mine)|T then
-		ID = IDPlayer
+			ID = IDPlayer
 
-		%check if ListMine is empty
-		if {Length ListMine} == 0 then
-			Mine = null
-			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine}
-		else
-			Mine = {Nth ListMine (({OS.rand} mod {Length ListMine}) +1)}
-			local NewMineList in
-			NewMineList = {List.subtract ListMine Mine}
-			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile NewMineList}
+			%check if ListMine is empty
+			if {Length ListMine} == 0 then
+				Mine = null
+				{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine}
+			else
+				Mine = {Nth ListMine (({OS.rand} mod {Length ListMine}) +1)}
+				local NewMineList in
+					NewMineList = {List.subtract ListMine Mine}
+					{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile NewMineList}
+				end
 			end
-		end
 
-			[] isDead(?Answer)|T then
-				if (Life == 0) then
+		[] isDead(?Answer)|T then
+			if (Life == 0) then
+				Answer = true
+			else
+				Answer = false
+			end
+			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine}
+
+		[] sayMissileExplode(_ Position ?Message)|T then
+			local Dista in
+				% Dista = Distance MissileExplode-PlayerPosition
+				Dista = {Number.abs (Position.x-Pos.x)} + {Number.abs (Position.y-Pos.y)}
+				if (Dista >= 2) then
+					Message = null
+					{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine}
+				elseif (Dista == 1) then
+					if (Life == 1) then
+						Message = sayDeath(IDPlayer)
+						{TreatStream T null Pos Path 0 IsDive LoadMine LoadMissile ListMine}
+					else
+						Message = sayDamageTaken(IDPlayer 1 Life-1)
+						{TreatStream T IDPlayer Pos Path Life-1 IsDive LoadMine LoadMissile ListMine}
+					end
+				else
+					if (Life =< 2) then
+						Message = sayDeath(IDPlayer)
+						{TreatStream T IDPlayer Pos Path 0 IsDive LoadMine LoadMissile ListMine}
+					else
+						Message = sayDamageTaken(IDPlayer 2 Life-2)
+						{TreatStream T IDPlayer Pos Path Life-2 IsDive LoadMine LoadMissile ListMine}
+					end
+				end
+			end
+
+		[] sayMineExplode(_ Position ?Message)|T then
+			local Dista in
+				% Dista = Distance MineExplode-PlayerPosition
+				Dista = {Number.abs (Position.x-Pos.x)} + {Number.abs (Position.y-Pos.y)}
+				if (Dista >= 2) then
+					Message = null
+					{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine}
+				elseif (Dista == 1) then
+					if (Life == 1) then
+						Message = sayDeath(IDPlayer)
+						{TreatStream T IDPlayer Pos Path 0 IsDive LoadMine LoadMissile ListMine}
+					else
+						Message = sayDamageTaken(IDPlayer 1 Life-1)
+						{TreatStream T IDPlayer Pos Path Life-1 IsDive LoadMine LoadMissile ListMine}
+					end
+				else
+					if (Life =< 2) then
+						Message = sayDeath(IDPlayer)
+						{TreatStream T IDPlayer Pos Path 0 IsDive LoadMine LoadMissile ListMine}
+					else
+						Message = sayDamageTaken(IDPlayer 2 Life-2)
+						{TreatStream T IDPlayer Pos Path Life-2 IsDive LoadMine LoadMissile ListMine}
+					end
+				end
+			end
+
+		[] sayPassingDrone(Drone ?ID ?Answer)|T then
+			ID = IDPlayer
+			case Drone of drone(row X) then
+				if (X == Pos.x) then
 					Answer = true
 				else
 					Answer = false
 				end
-				{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine}
-
-		[] sayMissileExplode(_ Position ?Message)|T then
-		local Dista in
-			% Dista = Distance MissileExplode-PlayerPosition
-			Dista = {Number.abs (Position.x-Pos.x)} + {Number.abs (Position.y-Pos.y)}
-			if (Dista >= 2) then
-			Message = null
+			[] drone(column Y) then
+				if (Y == Pos.y) then
+					Answer = true
+				else
+					Answer = false
+				end
+			end
 			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine}
-			elseif (Dista == 1) then
-			if (Life == 1) then
-			Message = sayDeath(IDPlayer)
-			{TreatStream T null Pos Path 0 IsDive LoadMine LoadMissile ListMine}
-			else
-			Message = sayDamageTaken(IDPlayer 1 Life-1)
-			{TreatStream T IDPlayer Pos Path Life-1 IsDive LoadMine LoadMissile ListMine}
-			end
-			else
-			if (Life =< 2) then
-			Message = sayDeath(IDPlayer)
-			{TreatStream T IDPlayer Pos Path 0 IsDive LoadMine LoadMissile ListMine}
-			else
-			Message = sayDamageTaken(IDPlayer 2 Life-2)
-			{TreatStream T IDPlayer Pos Path Life-2 IsDive LoadMine LoadMissile ListMine}
-			end
-			end
-		end
-
-		[] sayMineExplode(_ Position ?Message)|T then
-		local Dista in
-			% Dista = Distance MineExplode-PlayerPosition
-			Dista = {Number.abs (Position.x-Pos.x)} + {Number.abs (Position.y-Pos.y)}
-			if (Dista >= 2) then
-			Message = null
-			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine}
-			elseif (Dista == 1) then
-			if (Life == 1) then
-			Message = sayDeath(IDPlayer)
-			{TreatStream T IDPlayer Pos Path 0 IsDive LoadMine LoadMissile ListMine}
-			else
-			Message = sayDamageTaken(IDPlayer 1 Life-1)
-			{TreatStream T IDPlayer Pos Path Life-1 IsDive LoadMine LoadMissile ListMine}
-			end
-			else
-			if (Life =< 2) then
-			Message = sayDeath(IDPlayer)
-			{TreatStream T IDPlayer Pos Path 0 IsDive LoadMine LoadMissile ListMine}
-			else
-			Message = sayDamageTaken(IDPlayer 2 Life-2)
-			{TreatStream T IDPlayer Pos Path Life-2 IsDive LoadMine LoadMissile ListMine}
-			end
-			end
-		end
-
-		[] sayPassingDrone(Drone ?ID ?Answer)|T then
-		ID = IDPlayer
-		case Drone of drone(row X) then
-			if (X == Pos.x) then
-			Answer = true
-			else
-			Answer = false
-			end
-		[] drone(column Y) then
-			if (Y == Pos.y) then
-			Answer = true
-			else
-			Answer = false
-			end
-		end
-		{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine}
 
 		[] sayPassingSonar(?ID ?Answer)|T then
-		ID = IDPlayer
-		%strategy : return always true row and false column
-		local ListRow FCol in
-			ListRow = {List.subtract {IntList Input.nColumn 1} Pos.y}
-			FCol = {Nth ListRow (({OS.rand} mod (Input.nColumn - 1)) + 1)}
-			Answer = pt(x:Pos.x y:FCol)
-		end
-		{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine}
+			ID = IDPlayer
+			%strategy : return always true row and false column
+			local ListRow FCol in
+				ListRow = {List.subtract {IntList Input.nColumn 1} Pos.y}
+				FCol = {Nth ListRow (({OS.rand} mod (Input.nColumn - 1)) + 1)}
+				Answer = pt(x:Pos.x y:FCol)
+			end
+			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine}
 
-		%The RandomPlayer ignore SayMove, SaySurface, SayCharge, SayMinePlaced, SayAnswerDrone, SayAnswerSonar, SayDeath and SayDamageTaken
-		%These ignored case therefore enter in basic case
-		
+			%The RandomPlayer ignore SayMove, SaySurface, SayCharge, SayMinePlaced, SayAnswerDrone, SayAnswerSonar, SayDeath and SayDamageTaken
+			%These ignored case therefore enter in basic case
+			
 		%basic case
 		[] _|T then
-		{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine}
+			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine}
 		end
 		
 	end

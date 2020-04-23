@@ -73,14 +73,24 @@ define
       end
    end
 
-    
-    % Port => this submarine's port
-    % EPL => List of the ennemies' port
-    % DiveStatus == 0 => the submarine is underwater
-    % DiveStatus > 0  => the submarine has surfaced and has to wait DiveStatus turns
+   proc {SkipTurn SWait PForward}
+      case SWait
+      of _|T then
+         {Send PForward unit}
+         {SkipTurn T PForward}
+      else
+         skip
+      end
+   end
+
+
+   % Port => this submarine's port
+   % EPL => List of the ennemies' port
+   % DiveStatus == 0 => the submarine is underwater
+   % DiveStatus > 0  => the submarine has surfaced and has to wait DiveStatus turns
    proc {HandlePlayer SWait PForward DiveStatus GUI EPL Port}
-         case SWait
-         of _|T then
+      case SWait
+      of _|T then
          if DiveStatus > 0 then
             {Send PForward unit}
             {HandlePlayer T PForward DiveStatus-1 GUI EPL Port}
@@ -90,6 +100,11 @@ define
             {Send Port dive}
             {Send Port move(Id Pos Dir)}
             {Wait Id}
+            % if the player is dead it's useless to propose him any action
+            if Id == null then
+               {Send PForward unit}
+               {SkipTurn SWait PForward}
+            end
             {Wait Pos}
             {Wait Dir}
             case Dir
@@ -109,6 +124,10 @@ define
 
                {Send Port chargeItem(IdCharge ItemKind)}
                {Wait IdCharge}
+               if IdCharge == null then
+                  {Send PForward unit}
+                  {SkipTurn SWait PForward}
+               end
                {Wait ItemKind}
 
                if ItemKind \= null then
@@ -117,6 +136,10 @@ define
 
                {Send Port fireItem(IdFire FireKind)}
                {Wait IdFire}
+               if IdFire == null then
+                  {Send PForward unit}
+                  {SkipTurn SWait PForward}
+               end
                {Wait FireKind}
                case FireKind
                of mine(Pos) then
@@ -137,6 +160,10 @@ define
 
                {Send Port fireMine(IdMine Mine)}
                {Wait IdMine}
+               if IdMine == null then
+                  {Send PForward unit}
+                  {SkipTurn SWait PForward}
+               end
                {Wait Mine}
                case Mine
                of null then
@@ -328,8 +355,10 @@ define
       in
          {Send P sayPassingDrone(Drone Id Ans)}
          {Wait Id}
-         {Wait Ans}
-         {Send PAns sayAnswerDrone(Drone Id Ans)}
+         if Id \= null then
+            {Wait Ans}
+            {Send PAns sayAnswerDrone(Drone Id Ans)}
+         end
          {BroadcastDrone T PAns Drone}
       [] nil then
 	      skip
@@ -343,8 +372,10 @@ define
       in
          {Send P sayPassingSonar(Id Ans)}
          {Wait Id}
-         {Wait Ans}
-         {Send PAns sayAnswerSonar(Id Ans)}
+         if Id \= null then
+            {Wait Ans}
+            {Send PAns sayAnswerSonar(Id Ans)}
+         end
          {BroadcastSonar T PAns}
       [] nil then
 	      skip

@@ -248,7 +248,6 @@ in
 		[] sayMove(ID Direction)|T then
 			N
 		in
-			%TODO some movements seem to not be registered and it seems to cause a bias in the prediction
 			{Show IDPlayer#' 1'}
 			% we don't need to track ourselves
 			if ID == IDPlayer then
@@ -261,6 +260,7 @@ in
 				if {Nth EFound N} == true then
 					NewEPaths = {MoveNthInDir EPaths N Direction}
 					{Show IDPlayer#NewEPaths}
+					{Delay 20000}
 					{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine NewEPaths EIDs EFound}
 				%if position uncertain, add to path and try to pinpoint ennemy
 				else
@@ -278,7 +278,8 @@ in
 					in
 						{Show IDPlayer#'Ennemy found'}
 						{Show IDPlayer#ID}
-						{Show IDPlayer#NewPath}
+						{Show IDPlayer#ResultMatch}
+					{Delay 20000}
 						%delay is to debug and see if it works TODO remove once checked
 						
 						%TODO replace path with position 
@@ -338,7 +339,7 @@ in
 			end
 		else
 			case L
-			of H|T then
+			of _|T then
 				E|T
 			else
 				nil
