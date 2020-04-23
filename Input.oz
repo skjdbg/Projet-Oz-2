@@ -80,7 +80,7 @@ in
    end
 
    fun{RowGenerator Row}
-      if (Row == 0) then nil
+      if (Row =< 0) then nil
       else
          {ColGenerator NColumn}|{RowGenerator Row-1}
       end
