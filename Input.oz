@@ -1,4 +1,6 @@
 functor
+import
+   OS
 export
    isTurnByTurn:IsTurnByTurn
    nRow:NRow
@@ -41,6 +43,13 @@ define
    MinDistanceMissile
    MaxDistanceMissile
    GUIDelay
+
+   RowMin
+   RowMax
+   ColMin
+   ColMax
+   ColGenerator
+   RowGenerator
 in
 
 %%%% Style of game %%%%
@@ -49,10 +58,38 @@ in
 
 %%%% Description of the map %%%%
 
-   NRow = 10
-   NColumn = 10
+   %Genrate random NRow and Ncolumn
+   RowMin = 5
+   RowMax = 20
+   ColMin = 5
+   ColMax = 20
+   NRow = (({OS.rand} mod (RowMax - RowMin)) + RowMin)
+   NColumn = (({OS.rand} mod (ColMax - ColMin)) + ColMin)
 
-   Map = [[0 0 0 0 0 0 0 0 0 0]
+   %Generate random Column
+   fun{ColGenerator Col}
+      if (Col == 0) then nil
+      else
+         %if number random = 3 then island (1) else water (0)
+         if (({OS.rand} mod 5) == 3) then
+            1|{ColGenerator Col-1}
+         else
+            0|{ColGenerator Col-1}
+         end
+      end
+   end
+
+   fun{RowGenerator Row}
+      if (Row == 0) then nil
+      else
+         {ColGenerator NColumn}|{RowGenerator Row-1}
+      end
+   end
+
+
+   Map = {RowGenerator NRow}
+
+   /*Map = [[0 0 0 0 0 0 0 0 0 0]
 	  [0 0 0 0 0 0 0 0 0 0]
 	  [0 0 0 1 1 0 0 0 0 0]
 	  [0 0 1 1 0 0 1 0 0 0]
@@ -61,7 +98,7 @@ in
 	  [0 0 0 1 0 0 1 1 0 0]
 	  [0 0 1 1 0 0 1 0 0 0]
 	  [0 0 0 0 0 0 0 0 0 0]
-	  [0 0 0 0 0 0 0 0 0 0]]
+	  [0 0 0 0 0 0 0 0 0 0]] */
 
 %%%% Players description %%%%
 
