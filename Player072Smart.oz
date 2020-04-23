@@ -2,7 +2,7 @@ functor
 import
    Input
    OS
-   System(showInfo:Print)
+   System(show:Show print:Print)
 export
    portPlayer:StartPlayer
 define
@@ -16,20 +16,30 @@ define
    ValidPosItem
    IntList
    ContainsPt
+   MoveNthInDir
+   AddToNth
+   InsideOut
+   IsOcean
+   MatchToMap
+   ContainsAt
+   SetNth
 in
 	% TODO
 	% Stream : 
-	% IDPlayer : either null if we have been killed or our <id> ::= id(id:<IdNum> color:<Color>)
-	% Pos : our position pt(x:X y:Y)
-	% Path : list of positions since last surface
-	% Life : ammount of health left
-	% IsDive : true if underwater, false if not
-	% LoadMine : TODO
+	% IDPlayer : 	either null if we have been killed or our <id> ::= id(id:<IdNum> color:<Color>)
+	% Pos : 		our position pt(x:X y:Y)
+	% Path : 		list of positions since last surface
+	% Life : 		ammount of health left
+	% IsDive : 		true if underwater, false if not
+	% LoadMine : 	TODO
 	% LoadMissile : TODO
-	% ListMine : TODO
-	% EPaths : list of the ennemies' paths. used to try and guess where they are. if an ennemy's position is known, contains only this position
-	% EIDs : list of the ennemies' id. used to identify what path is whose (bijection with EPaths)
-	% EFound : list of either true of false. true if there is one and only one possible position for the corresponding ennemy
+	% ListMine : 	TODO
+	% EPaths : 		list of the ennemies' paths. used to try and guess where they are. if an ennemy's position is known, contains only this position
+	%				EPaths ::=  <List <carddirection>> '|' <EPaths>
+	%							| <position> '|' <EPaths>
+	%							| nil
+	% EIDs : 		list of the ennemies' id. used to identify what path is whose (bijection with EPaths)
+	% EFound : 		list of either true of false. true if there is one and only one possible position for the corresponding ennemy
    	proc {TreatStream Stream IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
 		case Stream
 		of nil then 
@@ -235,32 +245,289 @@ in
 
 		%The RandomPlayer ignore SayMove, SaySurface, SayCharge, SayMinePlaced, SayAnswerDrone, SayAnswerSonar, SayDeath and SayDamageTaken
 		%These ignored case therefore enter in basic case
-		[] sayMove(ID Direction) then
-			if {Contains EIDs ID} then
+		[] sayMove(ID Direction)|T then
+			N
+		in
+			%TODO some movements seem to not be registered and it seems to cause a bias in the prediction
+			{Show IDPlayer#' 1'}
+			% we don't need to track ourselves
+			if ID == IDPlayer then
+				{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
+			% a known ennemy moved. add to path and try to find him
+			elseif {ContainsAt EIDs ID 1 N} then
+				NewEPaths
+			in
+				{Show IDPlayer#' 3'}
+				% if position is already certain, update it
+				if {Nth EFound N} == true then
+					{Show IDPlayer#' 4'}
+					NewEPaths = {MoveNthInDir EPaths N Direction}
+					{Show IDPlayer#' 5'}
+					{Show IDPlayer#NewEPaths}
+					{Delay 10000}
+					{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine NewEPaths EIDs EFound}
+				%if position uncertain, add to path and try to pinpoint ennemy
+				else
+					NewPath ResultMatch
+				in
+					{Show IDPlayer#' 6'}
+					NewEPaths = {AddToNth EPaths N Direction NewPath}
+					{Show IDPlayer#' 7'}
+					ResultMatch = {MatchToMap Input.map NewPath}
+					{Show IDPlayer#' 8'}
+					case ResultMatch
+					% more than one match
+					of null then
+						{Show IDPlayer#' 9'}
+						{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine NewEPaths EIDs EFound}
+					% found ennemy
+					[] pt(x:X y:Y) then
+						NewEFound NewNewEPaths
+					in
+						{Show IDPlayer#' 10'}
+						{Show IDPlayer#'Ennemy found'}
+						{Show IDPlayer#ID}
+						{Show IDPlayer#ResultMatch}
+						{Show IDPlayer#NewPath}
+						%delay is to debug and see if it works TODO remove once checked
+						{Delay 30000}
+						
+						%TODO replace path with position 
+						NewNewEPaths = {SetNth EPaths ResultMatch N}
+						%{Show IDPlayer#New}
+						NewEFound = {SetNth EFound true N}
+						{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine NewNewEPaths EIDs NewEFound}
+					% the given path can't fit in the Map
+					% either an ennemy is cheating or we have a bug to correct
+					[] reset then
+						{Show IDPlayer#11}
+						{Show IDPlayer#'No possible Match, reset'}
+						{Show IDPlayer#NewPath}
+						{Delay 20000}
 
+						% TODO: reset this path
+						{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine NewEPaths EIDs EFound}
+					end
+				end
+			% unknown ennemy. add him to the tracking list
 			else
-
+				{Show IDPlayer#12}
+				{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine (Direction|nil)|EPaths ID|EIDs false|EFound}
 			end
-		[] saySurface(ID) then
-
-		[] sayCharge(ID KindItem) then
-
-		[] sayMinePlaced(ID) then
-
-		[] sayAnswerDrone(Drone ID Answer) then
-
-		[] sayAnswerSonar(ID Answer) then
-
-		[] sayDeath(ID) then
-
-		[] sayDamageTaken(ID Damage LifeLeft) then
-
+		[] saySurface(ID)|T then
+			%TODO
+			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
+		[] sayCharge(ID KindItem)|T then
+			%TODO
+			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
+		[] sayMinePlaced(ID)|T then
+			%TODO
+			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
+		[] sayAnswerDrone(Drone ID Answer)|T then
+			%TODO
+			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
+		[] sayAnswerSonar(ID Answer)|T then
+			%TODO
+			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
+		[] sayDeath(ID)|T then
+			%TODO
+			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
+		[] sayDamageTaken(ID Damage LifeLeft)|T then
+			%TODO
+			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
 		%basic case
 		[] _|T then
 			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
 		end
 		
 	end
+
+	fun {SetNth L E N}
+		if N > 1 then
+			case L
+			of H|T then
+				H|{SetNth T E N-1}
+			% should never happen
+			else
+				nil
+			end
+		else
+			case L
+			of H|T then
+				E|T
+			else
+				nil
+			end
+		end
+	end
+
+	% returns true if E is in L and sets N to the corresponding index
+	% if E is not contained N will not be bound
+	% Acc should start at 1
+	fun {ContainsAt L E Acc ?N}
+		case L
+		of H|T then
+			if H == E then
+				N = Acc
+				true
+			else
+				{ContainsAt T E Acc+1 N}
+			end
+		else
+			false
+		end
+	end
+
+	% if more that one match is found return null
+	% if one and only one is found, return a <position> corresponding to the ennemy's position
+	% if no match is found returns reset => should never happen, but allows to restart from 0
+	fun {MatchToMap Map Path}
+		% if path fits in Map from given X and Y returns end position of path
+		% else return null
+		fun {CheckPath Map Path X Y}
+			if {IsOcean Map X Y} then
+				case Path
+				of H|T then
+					case H
+					of east then
+						{CheckPath Map T X Y+1}
+					[] west then
+						{CheckPath Map T X Y-1}
+					[] north then
+						{CheckPath Map T X-1 Y}
+					[] south then
+						{CheckPath Map T X+1 Y}
+					end
+				else
+					pt(x:X y:Y)
+				end
+			else
+				null
+			end
+		end
+
+		fun {MatchToMapIn Map Path X Y PathFound}
+			NewPathFound
+		in
+			NewPathFound = {CheckPath Map Path X Y}
+			% if this path is not possible
+			if NewPathFound == null then
+				% continue on the same column
+				if X < Input.nRow then
+					{MatchToMapIn Map Path X+1 Y PathFound}
+				% go to the next column
+				elseif Y < Input.nColumn then
+					{MatchToMapIn Map Path 1 Y+1 PathFound}
+				% reached the end
+				else
+					PathFound
+				end
+			% if it's the first path found 
+			elseif PathFound == null then
+				% continue on the same column
+				if X < Input.nRow then
+					{MatchToMapIn Map Path X+1 Y NewPathFound}
+				% go to the next column
+				elseif Y < Input.nColumn then
+					{MatchToMapIn Map Path 1 Y+1 NewPathFound}
+				% reached the end
+				else
+					NewPathFound
+				end
+			% we found two paths
+			else
+				null
+			end
+		end
+		ReversedPath = {InsideOut Path nil}
+	in
+		{MatchToMapIn Map Path 1 1 null}
+	end
+	
+	fun {IsOcean Map X Y}
+		if (X =< Input.nRow andthen X > 0 andthen Y > 0 andthen Y =< Input.nColumn ) then
+			{Nth {Nth Map X} Y} == 0
+		else
+			false
+		end
+	end
+
+	%{Browse {IsOcean [[0 0 0 0 0 0 0 0 0 0] [0 0 0 0 0 0 0 0 0 0] [0 0 0 1 1 0 0 0 0 0] [0 0 1 1 0 0 1 0 0 0] [0 0 0 0 0 0 0 0 0 0] [0 0 0 0 0 0 0 0 0 0] [0 0 0 1 0 0 1 1 0 0] [0 0 1 1 0 0 1 0 0 0] [0 0 0 0 0 0 0 0 0 0] [0 0 0 0 0 0 0 0 0 0]] 3 4}}
+
+
+	% given L = [a b ... y z], returns [z y ... b a]
+	% Acc should start as nil
+	fun {InsideOut L Acc}
+		case L
+		of H|T then
+			{InsideOut T H|Acc}
+		else
+			% L's terminating nil should not be added to the list
+			Acc
+		end
+	end
+
+	% prepends Dir to the Nth path
+	% Paths : list of paths
+	% N : TODO
+	% Dir : TODO
+	% Path : the updated path
+	fun {AddToNth Paths N Dir ?Path}
+		if N > 1 then
+			case Paths
+			of H|T then
+				H|{AddToNth T N-1 Dir Path}
+			% should probably never happen
+			else
+				Path = nil
+				nil
+			end
+		else
+			case Paths
+			of H|T then
+				Path = Dir|H
+				(Dir|H)|T
+			% should probably never happen
+			else
+				Path = nil
+				nil
+			end
+		end
+	end
+	% {Browse {AddToNth [nil north|east|nil north|nil] 2 east}}
+
+	% updates the Nth position in Dir direction
+	% does nothing if N is bigger than {Length Paths}
+	% if N < 1 behaves as if N = 1
+	fun {MoveNthInDir Paths N Dir}
+		if N > 1 then
+			case Paths
+			of H|T then
+				H|{MoveNthInDir T N-1 Dir}
+			% should probably never happen
+			else
+				nil
+			end
+		else
+			case Paths
+			of H|T then
+				case Dir
+				of east then
+					pt(x:H.x y:H.y+1)|T
+				[] west then
+					pt(x:H.x y:H.y-1)|T
+				[] north then
+					pt(x:H.x-1 y:H.y)|T
+				[] south then
+					pt(x:H.x+1 y:H.y)|T
+				end
+			% should probably never happen
+			else
+				nil
+			end
+		end
+	end
+	% {Browse {MoveNthInDir [north|nil pt(x:1 y:1) pt(x:3 y:3)] 8 east}}
 
 	%fonction for init position
 	fun {InitPosition}
@@ -364,7 +631,7 @@ in
 			of [pt(x:X y:Y) _] then
 
 				%check if is on map and is on water, and if NewPosition is not Visited
-				if (X >= 1 andthen X =< Input.nRow andthen Y >= 1 andthen Y =< Input.nColumn andthen ({Nth {Nth Input.map X} Y} == 0) andthen {Not {ContainsPt Path.2 H.1}} )then   %(if (Path == nil) then true else {Not {List.all Path.2 (fun{$ Elem} H.1\= Elem end)}} end)) %contains
+				if ({IsOcean Input.map X Y} andthen {Not {ContainsPt Path.2 H.1}} )then   %(if (Path == nil) then true else {Not {List.all Path.2 (fun{$ Elem} H.1\= Elem end)}} end)) %contains
 					H|{ValidPath T Path}
 				else
 					{ValidPath T Path}
@@ -422,7 +689,7 @@ in
 		{NewPort Stream Port}
 		% initialise Random Player
 		thread
-			{TreatStream Stream id(id:ID color:Color name:smartAI) pt(x:0 y:0) nil Input.maxDamage false 0 0 nil}
+			{TreatStream Stream id(id:ID color:Color name:smartAI) pt(x:0 y:0) nil Input.maxDamage false 0 0 nil nil nil nil}
 		end
 		%return
 		Port
