@@ -257,40 +257,29 @@ in
 			elseif {ContainsAt EIDs ID 1 N} then
 				NewEPaths
 			in
-				{Show IDPlayer#' 3'}
 				% if position is already certain, update it
 				if {Nth EFound N} == true then
-					{Show IDPlayer#' 4'}
 					NewEPaths = {MoveNthInDir EPaths N Direction}
-					{Show IDPlayer#' 5'}
 					{Show IDPlayer#NewEPaths}
-					{Delay 10000}
 					{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine NewEPaths EIDs EFound}
 				%if position uncertain, add to path and try to pinpoint ennemy
 				else
 					NewPath ResultMatch
 				in
-					{Show IDPlayer#' 6'}
 					NewEPaths = {AddToNth EPaths N Direction NewPath}
-					{Show IDPlayer#' 7'}
 					ResultMatch = {MatchToMap Input.map NewPath}
-					{Show IDPlayer#' 8'}
 					case ResultMatch
 					% more than one match
 					of null then
-						{Show IDPlayer#' 9'}
 						{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine NewEPaths EIDs EFound}
 					% found ennemy
 					[] pt(x:X y:Y) then
 						NewEFound NewNewEPaths
 					in
-						{Show IDPlayer#' 10'}
 						{Show IDPlayer#'Ennemy found'}
 						{Show IDPlayer#ID}
-						{Show IDPlayer#ResultMatch}
 						{Show IDPlayer#NewPath}
 						%delay is to debug and see if it works TODO remove once checked
-						{Delay 30000}
 						
 						%TODO replace path with position 
 						NewNewEPaths = {SetNth EPaths ResultMatch N}
@@ -300,10 +289,7 @@ in
 					% the given path can't fit in the Map
 					% either an ennemy is cheating or we have a bug to correct
 					[] reset then
-						{Show IDPlayer#11}
 						{Show IDPlayer#'No possible Match, reset'}
-						{Show IDPlayer#NewPath}
-						{Delay 20000}
 
 						% TODO: reset this path
 						{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine NewEPaths EIDs EFound}
@@ -311,7 +297,6 @@ in
 				end
 			% unknown ennemy. add him to the tracking list
 			else
-				{Show IDPlayer#12}
 				{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine (Direction|nil)|EPaths ID|EIDs false|EFound}
 			end
 		[] saySurface(ID)|T then
@@ -441,7 +426,7 @@ in
 		end
 		ReversedPath = {InsideOut Path nil}
 	in
-		{MatchToMapIn Map Path 1 1 null}
+		{MatchToMapIn Map ReversedPath 1 1 null}
 	end
 	
 	fun {IsOcean Map X Y}
