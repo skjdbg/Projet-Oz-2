@@ -23,6 +23,7 @@ define
    MatchToMap
    ContainsAt
    SetNth
+   DistantMine
 in
 	% TODO
 	% Stream : 
@@ -680,7 +681,7 @@ in
 	end
 
 	%Filter and substract nearby Mine
-	fun{DistantMine MyPos ListMine}{
+	fun{DistantMine MyPos ListMine}
 		case ListMine of nil then nil
 		[] pt(x:X y:Y)|T then
 			local Dista in
@@ -692,7 +693,7 @@ in
 				end
 			end
 		end
-	}
+	end
 	
 	%Launch Player
 	fun {StartPlayer Color ID}
