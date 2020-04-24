@@ -54,7 +54,7 @@ in
 
 %%%% Style of game %%%%
 
-   IsTurnByTurn = true
+   IsTurnByTurn = false
 
 %%%% Description of the map %%%%
 
@@ -109,8 +109,8 @@ in
 
 %%%% Thinking parameters (only in simultaneous) %%%%
 
-   ThinkMin = 500
-   ThinkMax = 3000
+   ThinkMin = 100
+   ThinkMax = 300
 
 %%%% Surface time/turns %%%%
 
@@ -118,7 +118,7 @@ in
 
 %%%% Life %%%%
 
-   MaxDamage = 7
+   MaxDamage = 3
 
 %%%% Number of load for each item %%%%
 
