@@ -50,6 +50,7 @@ define
    ColMax
    ColGenerator
    RowGenerator
+   PercentIsland
 in
 
 %%%% Style of game %%%%
@@ -58,20 +59,24 @@ in
 
 %%%% Description of the map %%%%
 
-   %Genrate random NRow and Ncolumn
+   %Minimum and Maximun number of row/column
    RowMin = 5
    RowMax = 10
    ColMin = 5
    ColMax = 10
+   %Genrate random NRow and Ncolumn
    NRow = (({OS.rand} mod (RowMax - RowMin)) + RowMin)
    NColumn = (({OS.rand} mod (ColMax - ColMin)) + ColMin)
+
+   %Percent of island (Exemple : if 10% then 100/10 -> number = 10, if 20% then 100/20 -> number = 5
+   PercentIsland = 10
 
    %Generate random Column
    fun{ColGenerator Col}
       if (Col == 0) then nil
       else
          %if number random = 3 then island (1) else water (0)
-         if (({OS.rand} mod 5) == 3) then
+         if (({OS.rand} mod PercentIsland) == 3) then
             1|{ColGenerator Col-1}
          else
             0|{ColGenerator Col-1}
