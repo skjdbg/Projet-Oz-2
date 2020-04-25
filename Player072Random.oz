@@ -2,7 +2,7 @@ functor
 import
    Input
    OS
-   System(showInfo:Print)
+   System(show:Show)
 export
    portPlayer:StartPlayer
 define
@@ -171,7 +171,7 @@ in
 				else
 					if (Life =< 2) then
 						Message = sayDeath(IDPlayer)
-						{TreatStream T IDPlayer Pos Path 0 IsDive LoadMine LoadMissile ListMine}
+						{TreatStream T null Pos Path 0 IsDive LoadMine LoadMissile ListMine}
 					else
 						Message = sayDamageTaken(IDPlayer 2 Life-2)
 						{TreatStream T IDPlayer Pos Path Life-2 IsDive LoadMine LoadMissile ListMine}
@@ -189,7 +189,7 @@ in
 				elseif (Dista == 1) then
 					if (Life == 1) then
 						Message = sayDeath(IDPlayer)
-						{TreatStream T IDPlayer Pos Path 0 IsDive LoadMine LoadMissile ListMine}
+						{TreatStream T null Pos Path 0 IsDive LoadMine LoadMissile ListMine}
 					else
 						Message = sayDamageTaken(IDPlayer 1 Life-1)
 						{TreatStream T IDPlayer Pos Path Life-1 IsDive LoadMine LoadMissile ListMine}
@@ -197,7 +197,7 @@ in
 				else
 					if (Life =< 2) then
 						Message = sayDeath(IDPlayer)
-						{TreatStream T IDPlayer Pos Path 0 IsDive LoadMine LoadMissile ListMine}
+						{TreatStream T null Pos Path 0 IsDive LoadMine LoadMissile ListMine}
 					else
 						Message = sayDamageTaken(IDPlayer 2 Life-2)
 						{TreatStream T IDPlayer Pos Path Life-2 IsDive LoadMine LoadMissile ListMine}

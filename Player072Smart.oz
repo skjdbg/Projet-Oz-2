@@ -203,7 +203,7 @@ in
 				else
 					if (Life =< 2) then
 						Message = sayDeath(IDPlayer)
-						{TreatStream T IDPlayer Pos Path 0 IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
+						{TreatStream T null Pos Path 0 IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
 					else
 						Message = sayDamageTaken(IDPlayer 2 Life-2)
 						{TreatStream T IDPlayer Pos Path Life-2 IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
@@ -221,7 +221,7 @@ in
 				elseif (Dista == 1) then
 					if (Life == 1) then
 						Message = sayDeath(IDPlayer)
-						{TreatStream T IDPlayer Pos Path 0 IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
+						{TreatStream T null Pos Path 0 IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
 					else
 						Message = sayDamageTaken(IDPlayer 1 Life-1)
 						{TreatStream T IDPlayer Pos Path Life-1 IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
@@ -229,7 +229,7 @@ in
 				else
 					if (Life =< 2) then
 						Message = sayDeath(IDPlayer)
-						{TreatStream T IDPlayer Pos Path 0 IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
+						{TreatStream T null Pos Path 0 IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
 					else
 						Message = sayDamageTaken(IDPlayer 2 Life-2)
 						{TreatStream T IDPlayer Pos Path Life-2 IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
