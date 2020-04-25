@@ -93,6 +93,7 @@ in
 
 
    Map = {RowGenerator NRow}
+
    /*NRow = 10
    NColumn = 10
    Map = [[0 0 0 0 0 0 0 0 0 0]
@@ -123,7 +124,7 @@ in
 
 %%%% Life %%%%
 
-   MaxDamage = 3
+   MaxDamage = 10
 
 %%%% Number of load for each item %%%%
 
