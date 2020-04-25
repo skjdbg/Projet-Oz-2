@@ -125,7 +125,7 @@ define
                      {HandlePlayer T PForward Input.turnSurface-1 GUI EPL Port Synch}
                   else
                      IdCharge ItemKind
-                     IdFire FireKind
+                     IdFire FireKind PosMiss
                      IdMine Mine
                   in
                      {Broadcast EPL sayMove(Id Dir)}
@@ -276,7 +276,7 @@ define
                   {SimulateThink}
 
                   %9 Fire Item
-                  local IdFire FireKind in
+                  local IdFire FireKind PosMiss in
                      {Send Port fireItem(IdFire FireKind)}
                      {Wait IdFire}
                      if (IdFire == null) then
@@ -296,7 +296,7 @@ define
                         [] sonar then
                            {Send GUI sonar(IdFire)}
                            {BroadcastSonar EPL Port}
-                        else  % includes the "null" case
+                        [] _ then  % includes the "null" case
                            skip
                         end
                      end
@@ -444,7 +444,7 @@ define
 
     %Wait (thinMin - thinkMax)
    proc{SimulateThink}
-      {Delay (({OS.rand} mod (Input.thinkMax - Input.thinkMin)) + 1 + Input.thinkMin)}
+      {Delay (({OS.rand} mod (Input.thinkMax - Input.thinkMin + 1)) + Input.thinkMin)}
    end
 
    PlayerPorts

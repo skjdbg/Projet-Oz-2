@@ -55,7 +55,7 @@ in
 
 %%%% Style of game %%%%
 
-   IsTurnByTurn = false
+   IsTurnByTurn = true
 
 %%%% Description of the map %%%%
 
@@ -65,11 +65,11 @@ in
    ColMin = 5
    ColMax = 10
    %Genrate random NRow and Ncolumn
-   NRow = (({OS.rand} mod (RowMax - RowMin)) + RowMin)
-   NColumn = (({OS.rand} mod (ColMax - ColMin)) + ColMin)
+   NRow = (({OS.rand} mod (RowMax - RowMin + 1)) + RowMin)
+   NColumn = (({OS.rand} mod (ColMax - ColMin + 1)) + ColMin)
 
    %Percent of island (Exemple : if 10% then 100/10 -> number = 10, if 20% then 100/20 -> number = 5
-   PercentIsland = 10
+   PercentIsland = 5
 
    %Generate random Column
    fun{ColGenerator Col}
@@ -123,7 +123,7 @@ in
 
 %%%% Life %%%%
 
-   MaxDamage = 3
+   MaxDamage = 15
 
 %%%% Number of load for each item %%%%
 
