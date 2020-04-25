@@ -55,7 +55,7 @@ in
 
 %%%% Style of game %%%%
 
-   IsTurnByTurn = false
+   IsTurnByTurn = true
 
 %%%% Description of the map %%%%
 
@@ -93,6 +93,7 @@ in
 
 
    Map = {RowGenerator NRow}
+
    /*NRow = 10
    NColumn = 10
    Map = [[0 0 0 0 0 0 0 0 0 0]
@@ -109,13 +110,13 @@ in
 %%%% Players description %%%%
 
    NbPlayer = 3
-   Players = [player072r player072random player072random]
+   Players = [player player player]
    Colors = [red green blue]
 
 %%%% Thinking parameters (only in simultaneous) %%%%
 
-   ThinkMin = 100
-   ThinkMax = 300
+   ThinkMin = 10
+   ThinkMax = 30
 
 %%%% Surface time/turns %%%%
 
@@ -123,7 +124,7 @@ in
 
 %%%% Life %%%%
 
-   MaxDamage = 3
+   MaxDamage = 10
 
 %%%% Number of load for each item %%%%
 
