@@ -297,28 +297,28 @@ in
 
 		%fonction move, the player move to a ramdom position
 	fun{Move Pos Path IsDive}
-		local AllDir CorrectPos ChooseDir NameDir ExactPos Tmp in
+		local AllDir CorrectPos in
 			
 			%All possible direction
-			AllDir = [[pt(x:Pos.x y:Pos.y) surface] [pt(x:Pos.x-1 y:Pos.y) north] [pt(x:Pos.x+1 y:Pos.y) south] [pt(x:Pos.x y:Pos.y-1) west] [pt(x:Pos.x y:Pos.y+1) east]]
+			AllDir = [[pt(x:Pos.x-1 y:Pos.y) north] [pt(x:Pos.x+1 y:Pos.y) south] [pt(x:Pos.x y:Pos.y-1) west] [pt(x:Pos.x y:Pos.y+1) east]]
 
 			%Check which position is valid (with fonction ValidPath)
 			CorrectPos = {ValidPath AllDir Path}
 
-
-			%choose random direction
-			ChooseDir = {Nth CorrectPos (({OS.rand} mod {Length CorrectPos}) + 1)}
-			%Name of Direction
-			NameDir = ChooseDir.2.1
-			%New Position
-			ExactPos = ChooseDir.1
-			%return [direction position path IsDive]
-			if (NameDir == surface) then
-				[NameDir ExactPos ExactPos|nil false]
+			if {Length CorrectPos} == 0 then
+				[surface Pos Pos|nil false]
 			else
-				[NameDir ExactPos ExactPos|Path IsDive]
+				local ChooseDir NameDir ExactPos in 
+					%choose random direction
+					ChooseDir = {Nth CorrectPos (({OS.rand} mod {Length CorrectPos}) + 1)}
+					%Name of Direction
+					NameDir = ChooseDir.2.1
+					%New Position
+					ExactPos = ChooseDir.1
+					%return [direction position path IsDive]
+					[NameDir ExactPos ExactPos|Path IsDive]
+				end
 			end
-					
 		end
 	end	
 	
