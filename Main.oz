@@ -74,7 +74,7 @@ define
    end
 
    proc {SkipTurn SWait PForward}
-   %TODO kill every thread once all is Done
+      %TODO kill every thread once all is Done
       case SWait
       of H|T then
          if H \= 'end' then
