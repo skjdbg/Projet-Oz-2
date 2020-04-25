@@ -4,7 +4,7 @@
 # 28751600 : d'Herbais de Thun Sebastien
 # ----------------------------
 
-OZC = ozc.exe
+OZC = ozc
 RM = rm
 DEL = del
 
@@ -21,7 +21,7 @@ compilePlayers:
 	$(OZC) -c Player072Random.oz
 
 run: build
-	ozengine.exe Main.ozf
+	ozengine Main.ozf
 
 %.ozf: %.oz
 	$(OZC) -c $<
