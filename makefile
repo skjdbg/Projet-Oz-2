@@ -1,7 +1,5 @@
 # ----------------------------
-# group nb 077
-# 16241600 : Docquier Eric
-# 28751600 : d'Herbais de Thun Sebastien
+# Groupe 072
 # ----------------------------
 
 OZC = ozc
