@@ -67,7 +67,7 @@ in
    ColMin = 5
    ColMax = 10
 
-   %Percentage of island
+   %Average Percentage of island
    PercentIsland = 10
 
   %%%%%%%  End of USER Preferences %%%%%%%%%
