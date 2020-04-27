@@ -2,7 +2,7 @@
 # Groupe 072
 # ----------------------------
 
-OZC = ozc
+OZC = ozc.exe
 RM = rm
 DEL = del
 
@@ -19,7 +19,7 @@ compilePlayers:
 	$(OZC) -c Player072Random.oz
 
 run: build
-	ozengine Main.ozf
+	ozengine.exe Main.ozf
 
 %.ozf: %.oz
 	$(OZC) -c $<

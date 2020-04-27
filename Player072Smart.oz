@@ -65,48 +65,30 @@ in
 			{TreatStream T IDPlayer Position Position|nil Input.maxDamage false LoadMine LoadMissile ListMine EPaths EIDs EFound}
 
 		[] move(?ID ?Position ?Direction)|T then
-			Dest = {IsEnnemyFound EPaths EFound}
-		in
-			ID = IDPlayer
-			if Dest == nil then
-				local ListMove in
-					%collect the retrun list of function Move ( [direction position path IsDive] )
-					ListMove = {Move Pos Path IsDive}
-					%dir and pos
-					Direction = ListMove.1
-					Position = ListMove.2.1
-
-					%end
-					{TreatStream T IDPlayer ListMove.2.1 ListMove.2.2.1 Life ListMove.2.2.2.1 LoadMine LoadMissile ListMine EPaths EIDs EFound}
-				end
-			elseif {ContainsPt Path.2 Dest} then
-				Position = Pos
-				Direction = surface
-
-				{TreatStream T IDPlayer Position Position|nil Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
-			else
-				Mapo = {MapToPortObject Input.map 1 1}
-				Return
-				Path
+			local
+				Dest = {IsEnnemyFound EPaths EFound}
 			in
-				{SetTileList Mapo Mapo}
-				
-				{Show 1}
-				{Show Dest}
-				{Send {Nth {Nth Mapo Dest.x} Dest.y} setAsDest(Return)}
-				{Show 2}
-				{Send {Nth {Nth Mapo Pos.x} Pos.y} sayCost(0 nil)}
-				{Show 3}
-				{Wait Return}
-				Path = {InsideOut Return nil}
-				Position = Path.1
-				Direction = {PosToDir Pos Position}
+				ID = IDPlayer
+				if Dest == nil then
+					local ListMove in
+						%collect the retrun list of function Move ( [direction position path IsDive] )
+						ListMove = {Move Pos Path IsDive}
+						%dir and pos
+						Direction = ListMove.1
+						Position = ListMove.2.1
 
-				{TreatStream T IDPlayer Position Position|Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
+						%end
+						{TreatStream T IDPlayer ListMove.2.1 ListMove.2.2.1 Life ListMove.2.2.2.1 LoadMine LoadMissile ListMine EPaths EIDs EFound}
+					end
+				elseif {ContainsPt Path.2 Dest} then
+
+				else
+					
+				end
 			end
+
 		[] dive|T then
 			{TreatStream T IDPlayer Pos Path Life true LoadMine LoadMissile ListMine EPaths EIDs EFound}
-
 
 			%The Random Player don't use Sonar and Drone (He use only mine and missile)
 		[] chargeItem(?ID ?KindItem)|T then
@@ -324,9 +306,9 @@ in
 						NewEFound NewNewEPaths
 					in
 						%{Show IDPlayer#'Ennemy found'}
-						%{Show IDPlayer#ID}
-						%{Show IDPlayer#ResultMatch}
-						%{Delay 20000}
+						{Show IDPlayer#ID}
+						{Show IDPlayer#ResultMatch}
+						{Delay 5000}
 						%delay is to debug and see if it works TODO remove once checked
 						
 						%TODO replace path with position 
@@ -378,8 +360,6 @@ in
 	fun {IsEnnemyFound PosL FoundL}
 		case PosL#FoundL
 		of (HP|TP)#(HF|TF) then
-			{Show pos(HP)}
-			{Show found(HF)}
 			if HF == true then
 				HP
 			else
@@ -566,7 +546,6 @@ in
 	% does nothing if N is bigger than {Length Paths}
 	% if N < 1 behaves as if N = 1
 	fun {MoveNthInDir Paths N Dir}
-		
 		if N > 1 then
 			case Paths
 			of H|T then
@@ -578,8 +557,10 @@ in
 		else
 			case Paths
 			of H|T then
-				{Show upPos(H)}
-				{Show upDir(Dir)}
+				if H.x == 0 orelse H.y==0 then
+					{Show upPos(H)}
+					{Show upDir(Dir)}
+				end
 				case Dir
 				of east then
 					pt(x:H.x y:H.y+1)|T

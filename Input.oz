@@ -55,17 +55,19 @@ in
 
 %%%% Style of game %%%%
 
-   IsTurnByTurn = false
+   IsTurnByTurn = true
 
 %%%% Description of the map %%%%
 
-/*   %Minimum and Maximun number of row/column
+  %%%%%%% USER Preferences %%%%%%%%%
+
+   %Minimum and Maximun number of row/column
    RowMin = 5
    RowMax = 10
    ColMin = 5
    ColMax = 10
 
-   %Percentage of island
+   %Average Percentage of island
    PercentIsland = 10
 
   %%%%%%%  End of USER Preferences %%%%%%%%%
@@ -99,8 +101,8 @@ in
 
 
    Map = {RowGenerator NRow}
-*/
-   NRow = 10
+
+   /*NRow = 10
    NColumn = 10
    Map = [[0 0 0 0 0 0 0 0 0 0]
 	  [0 0 0 0 0 0 0 0 0 0]
@@ -111,13 +113,13 @@ in
 	  [0 0 0 1 0 0 1 1 0 0]
 	  [0 0 1 1 0 0 1 0 0 0]
 	  [0 0 0 0 0 0 0 0 0 0]
-	  [0 0 0 0 0 0 0 0 0 0]]
+	  [0 0 0 0 0 0 0 0 0 0]]*/
 
 %%%% Players description %%%%
 
    NbPlayer = 3
-   Players = [player072random player]
-   Colors = [red green]
+   Players = [player072smart player072smart player072smart]
+   Colors = [red green blue]
 
 %%%% Thinking parameters (only in simultaneous) %%%%
 
