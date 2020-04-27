@@ -1,10 +1,8 @@
 # ----------------------------
-# group nb 077
-# 16241600 : Docquier Eric
-# 28751600 : d'Herbais de Thun Sebastien
+# Groupe 072
 # ----------------------------
 
-OZC = ozc.exe
+OZC = ozc
 RM = rm
 DEL = del
 
@@ -21,7 +19,7 @@ compilePlayers:
 	$(OZC) -c Player072Random.oz
 
 run: build
-	ozengine.exe Main.ozf
+	ozengine Main.ozf
 
 %.ozf: %.oz
 	$(OZC) -c $<

@@ -222,8 +222,10 @@ define
 
 
    proc {RunSimultaneous EPL GUI}
-       %Proc to plays player's turn
-      proc{TurnPlayer Port}
+      %Proc to plays player's turn
+      proc{TurnPlayer Port Synch}
+
+         % TODO END when 1 player still alive 
 	  
 	      %1 beginning with dive
 	      {Send Port dive}
@@ -236,6 +238,7 @@ define
             {Send Port move(Id Pos Dir)}
             {Wait Id}
             if (Id == null) then
+               {Send Synch 1}
                skip
             else
                {Wait Pos}
@@ -248,7 +251,7 @@ define
                   {Send GUI surface(Id)}
                   %delay *1000
                   {Delay (Input.turnSurface * 1000)}
-                  {TurnPlayer Port}
+                  {TurnPlayer Port Synch}
 
                %5 broadcast direction
                else
@@ -263,75 +266,83 @@ define
                      {Send Port chargeItem(IdCharge ItemKind)}
                      {Wait IdCharge}
                      if (IdCharge == null) then
+                        {Send Synch 1}
                         skip
                      else
                         {Wait ItemKind}
                         if ItemKind \= null then
                            {Broadcast EPL sayCharge(IdCharge ItemKind)}
                         end
-                     end
-                  end
 
-                  %8 Simulate thinking player
-                  {SimulateThink}
+                        %8 Simulate thinking player
+                        {SimulateThink}
 
-                  %9 Fire Item
-                  local IdFire FireKind PosMiss in
-                     {Send Port fireItem(IdFire FireKind)}
-                     {Wait IdFire}
-                     if (IdFire == null) then
-                        skip
-                     else
-                        {Wait FireKind}
-                        case FireKind
-                        of mine(Pos) then
-                           {Send GUI putMine(IdFire Pos)}
-                           {Broadcast EPL sayMinePlaced(IdFire)}
-                        [] missile(PosMiss) then
-                           {Send GUI explosion(IdFire PosMiss)}
-                           {BroadcastMissExp EPL IdFire PosMiss GUI}
-                        [] drone then
-                           {Send GUI drone(IdFire FireKind)}
-                           {BroadcastDrone EPL Port FireKind}
-                        [] sonar then
-                           {Send GUI sonar(IdFire)}
-                           {BroadcastSonar EPL Port}
-                        [] _ then  % includes the "null" case
-                           skip
+                        %9 Fire Item
+                        local IdFire FireKind PosMiss in
+                           {Send Port fireItem(IdFire FireKind)}
+                           {Wait IdFire}
+                           if (IdFire == null) then
+                              {Send Synch 1}
+                              skip
+                           else
+                              {Wait FireKind}
+                              case FireKind
+                              of mine(Pos) then
+                                 {Send GUI putMine(IdFire Pos)}
+                                 {Broadcast EPL sayMinePlaced(IdFire)}
+                              [] missile(PosMiss) then
+                                 {Send GUI explosion(IdFire PosMiss)}
+                                 {BroadcastMissExp EPL IdFire PosMiss GUI}
+                              [] drone then
+                                 {Send GUI drone(IdFire FireKind)}
+                                 {BroadcastDrone EPL Port FireKind}
+                              [] sonar then
+                                 {Send GUI sonar(IdFire)}
+                                 {BroadcastSonar EPL Port}
+                              [] _ then  % includes the "null" case
+                                 skip
+                              end
+
+                              %10 Simulate thinking player
+                              {SimulateThink}
+
+                              %11 explode mine
+                              local IdMine Mine in
+                                 {Send Port fireMine(IdMine Mine)}
+                                 {Wait IdMine}
+                                 if (IdMine == null) then
+                                    {Send Synch 1}
+                                    skip
+                                 else
+                                    {Wait Mine}
+                                    case Mine
+                                    of null then
+                                       skip
+                                    else
+                                       {BroadcastMineExp EPL IdMine Mine GUI}
+                                       {Send GUI explosion(IdMine Mine)}
+                                       {Send GUI removeMine(IdMine Mine)}
+                                    end
+
+                                    %12 Loop finished, go back to 1
+                                    {TurnPlayer Port Synch}
+                                 end
+                              end
+                           end
                         end
                      end
                   end
-
-                  %10 Simulate thinking player
-                  {SimulateThink}
-
-                  %11 explode mine
-                  local IdMine Mine in
-                     {Send Port fireMine(IdMine Mine)}
-                     {Wait IdMine}
-                     if (IdMine == null) then
-                        skip
-                     else
-                        {Wait Mine}
-                        case Mine
-                        of null then
-                           skip
-                        else
-                           {BroadcastMineExp EPL IdMine Mine GUI}
-                           {Send GUI explosion(IdMine Mine)}
-                           {Send GUI removeMine(IdMine Mine)}
-                        end
-                     end
-                  end
-
-                  %12 Loop finished, go back to 1
-                  {TurnPlayer Port}
                end
             end
 	      end
       end
+      Sync
+      StreamSync
    in
-      {List.forAll EPL (proc{$ Port} thread {TurnPlayer Port} end end)}
+      {NewPort StreamSync Sync}
+      {List.forAll EPL (proc{$ Port} thread {TurnPlayer Port Sync} end end)}
+      {WaitForN Input.nbPlayer-1 StreamSync} % we wait for exactly 1 winner (more precisely 1 or less)
+      {Show 'Game Over'}
    end
 
    proc {InitPlayers PL GUI}
