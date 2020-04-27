@@ -6,24 +6,33 @@ import
 export
    portPlayer:StartPlayer
 define
-   StartPlayer
-   TreatStream
-   InitPosition
-   FindElem
-   Move
-   ValidPath
-   AllPosition
-   ValidPosItem
-   IntList
-   ContainsPt
-   MoveNthInDir
-   AddToNth
-   InsideOut
-   IsOcean
-   MatchToMap
-   ContainsAt
-   SetNth
-   DistantMine
+	StartPlayer
+	TreatStream
+	InitPosition
+	FindElem
+	Move
+	ValidPath
+	AllPosition
+	ValidPosItem
+	IntList
+	ContainsPt
+	MoveNthInDir
+	AddToNth
+	InsideOut
+	IsOcean
+	MatchToMap
+	ContainsAt
+	SetNth
+	DistantMine
+	SetTileList
+	Validate
+	SendToNeighbors
+	DestFunction
+	TileFunction
+	NewTileObject
+	MapToPortObject
+	PosToDir
+	IsEnnemyFound
 in
 	% TODO
 	% Stream : 
@@ -56,22 +65,30 @@ in
 			{TreatStream T IDPlayer Position Position|nil Input.maxDamage false LoadMine LoadMissile ListMine EPaths EIDs EFound}
 
 		[] move(?ID ?Position ?Direction)|T then
-		
-			ID = IDPlayer
-			local ListMove in
-				%collect the retrun list of fonction Move ( [direction position path IsDive] )
-				ListMove = {Move Pos Path IsDive}
-				%dir and pos
-				Direction = ListMove.1
-				Position = ListMove.2.1
+			local
+				Dest = {IsEnnemyFound EPaths EFound}
+			in
+				ID = IDPlayer
+				if Dest == nil then
+					local ListMove in
+						%collect the retrun list of function Move ( [direction position path IsDive] )
+						ListMove = {Move Pos Path IsDive}
+						%dir and pos
+						Direction = ListMove.1
+						Position = ListMove.2.1
 
-				%end
-				{TreatStream T IDPlayer ListMove.2.1 ListMove.2.2.1 Life ListMove.2.2.2.1 LoadMine LoadMissile ListMine EPaths EIDs EFound}
+						%end
+						{TreatStream T IDPlayer ListMove.2.1 ListMove.2.2.1 Life ListMove.2.2.2.1 LoadMine LoadMissile ListMine EPaths EIDs EFound}
+					end
+				elseif {ContainsPt Path.2 Dest} then
+
+				else
+					
+				end
 			end
 
 		[] dive|T then
 			{TreatStream T IDPlayer Pos Path Life true LoadMine LoadMissile ListMine EPaths EIDs EFound}
-
 
 			%The Random Player don't use Sonar and Drone (He use only mine and missile)
 		[] chargeItem(?ID ?KindItem)|T then
@@ -262,7 +279,6 @@ in
 		[] sayMove(ID Direction)|T then
 			N
 		in
-			{Show IDPlayer#' 1'}
 			% we don't need to track ourselves
 			if ID == IDPlayer then
 				{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
@@ -273,8 +289,7 @@ in
 				% if position is already certain, update it
 				if {Nth EFound N} == true then
 					NewEPaths = {MoveNthInDir EPaths N Direction}
-					{Show IDPlayer#NewEPaths}
-					{Delay 20000}
+					%{Delay 20000}
 					{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine NewEPaths EIDs EFound}
 				%if position uncertain, add to path and try to pinpoint ennemy
 				else
@@ -290,10 +305,10 @@ in
 					[] pt(x:X y:Y) then
 						NewEFound NewNewEPaths
 					in
-						{Show IDPlayer#'Ennemy found'}
+						%{Show IDPlayer#'Ennemy found'}
 						{Show IDPlayer#ID}
 						{Show IDPlayer#ResultMatch}
-					{Delay 20000}
+						{Delay 5000}
 						%delay is to debug and see if it works TODO remove once checked
 						
 						%TODO replace path with position 
@@ -342,6 +357,36 @@ in
 		
 	end
 
+	fun {IsEnnemyFound PosL FoundL}
+		case PosL#FoundL
+		of (HP|TP)#(HF|TF) then
+			if HF == true then
+				HP
+			else
+				{IsEnnemyFound TP TF}
+			end
+		else
+			nil
+		end
+	end
+
+	fun {PosToDir Start Dest}
+		case Start#Dest
+		of pt(x:XS y:YS)#pt(x:XD y:YD) then
+			if XS-XD < 0 then
+				south
+			elseif XS+XD > 0 then
+				north
+			elseif YS-YD < 0 then
+				east
+			else
+				west
+			end
+		else
+			error
+		end
+	end
+
 	fun {SetNth L E N}
 		if N > 1 then
 			case L
@@ -385,6 +430,7 @@ in
 		% if path fits in Map from given X and Y returns end position of path
 		% else return null
 		fun {CheckPath Map Path X Y}
+			%TODO: change name ? there are two functions with the same name
 			if {IsOcean Map X Y} then
 				case Path
 				of H|T then
@@ -511,6 +557,10 @@ in
 		else
 			case Paths
 			of H|T then
+				if H.x == 0 orelse H.y==0 then
+					{Show upPos(H)}
+					{Show upDir(Dir)}
+				end
 				case Dir
 				of east then
 					pt(x:H.x y:H.y+1)|T
@@ -583,7 +633,7 @@ in
 
 		%fonction move, the player move to a ramdom position
 	fun {Move Pos Path IsDive}
-		local AllDir CorrectPos ChooseDir NameDir ExactPos Tmp in
+		local AllDir CorrectPos ChooseDir NameDir ExactPos in
 			
 			%All possible direction
 			AllDir = [[pt(x:Pos.x y:Pos.y) surface] [pt(x:Pos.x-1 y:Pos.y) north] [pt(x:Pos.x+1 y:Pos.y) south] [pt(x:Pos.x y:Pos.y-1) west] [pt(x:Pos.x y:Pos.y+1) east]]
@@ -694,6 +744,129 @@ in
 			end
 		end
 	end
+
+	%%%%%%%%%%%%%%%%%
+	%% PathFinding %%
+	%%%%%%%%%%%%%%%%%
+
+	proc {SetTileList LL Acc}
+		proc {SetTileListIn LL Acc}
+			case Acc
+			of wall|T then
+				{SetTileListIn LL T}
+			[] H|T then
+				{Send H setListTiles(LL)}
+				{SetTileListIn LL T}
+			else
+				skip
+			end
+		end
+	in
+		case Acc
+		of H|T then
+			{SetTileListIn LL H}
+			{SetTileList LL T}
+		else
+			skip
+		end
+	end
+
+	%takes a list of pt(x:X y:Y) and filters out all invalid movements
+	fun {Validate Map L}
+		case L
+		of pt(x:X y:Y)|T then
+			if X > 0 andthen Y > 0 andthen X =< Input.nRow andthen Y =< Input.nColumn andthen {Nth {Nth Map X} Y} \= wall then
+				pt(x:X y:Y)|{Validate Map T}
+			else
+				{Validate Map T}
+			end
+		else
+			nil
+		end
+	end
+
+	proc {SendToNeighbors LL Pos Msg}
+		proc {SendToNeighborsIn LL ValidL Msg}
+			case ValidL
+			of pt(x:X y:Y)|T then
+				{Send {Nth {Nth LL X} Y} Msg}
+				{SendToNeighborsIn LL T Msg}
+			else 
+				skip
+			end
+		end
+	in
+		case Pos
+		of pt(x:X y:Y) then
+			ValidNeighbors
+		in
+			ValidNeighbors = {Validate LL [pt(x:X+1 y:Y) pt(x:X-1 y:Y) pt(x:X y:Y+1) pt(x:X y:Y-1)]}
+			{SendToNeighborsIn LL ValidNeighbors Msg}
+		end
+	end
+
+	proc {DestFunction Stream ListTiles Pos ?Return}
+		case Stream
+		of sayCost(_ Path)|_ then
+			Return = Path
+			{Show Path}
+			{SendToNeighbors ListTiles Pos found}
+		end
+	end
+
+	proc {TileFunction Stream SelfPos SelfGCost PathToOrigin ListTiles}
+		case Stream
+		of found|_ then
+			{SendToNeighbors ListTiles SelfPos found}
+		[] sayCost(Cost Path)|T then
+			if (Cost + 1) < SelfGCost then
+				{SendToNeighbors ListTiles SelfPos sayCost(Cost+1 SelfPos|Path)}
+				{TileFunction T SelfPos Cost+1 SelfPos ListTiles}
+			else
+				{TileFunction T SelfPos SelfGCost PathToOrigin ListTiles}
+			end
+		[] setListTiles(Tiles)|T then
+			{TileFunction T SelfPos SelfGCost PathToOrigin Tiles}
+		[] setAsDest(?Return)|T then
+			{DestFunction T ListTiles SelfPos Return}
+		end
+	end
+
+	fun {NewTileObject Pos ListTiles}
+		Stream
+		Port = {NewPort Stream}
+	in
+		thread
+			{TileFunction Stream Pos 99999 nil ListTiles}
+		end
+		Port
+	end
+
+	fun {MapToPortObject Map X Y}
+		fun {RowToPortObject Row X Y}
+			case Row
+			of H|T then
+				if H == 0 then
+					{NewTileObject pt(x:X y:Y) nil}|{RowToPortObject T X Y+1}
+				else
+					wall|{RowToPortObject T X Y+1}
+				end
+			else
+				nil
+			end
+		end
+	in
+		case Map
+		of H|T then
+			{RowToPortObject H X Y}|{MapToPortObject T X+1 Y}
+		else
+			nil
+		end
+	end
+
+	%%%%%%%%%%%%%%%%%%%%%
+	%% End PathFinding %%
+	%%%%%%%%%%%%%%%%%%%%%
 	
 	%Launch Player
 	fun {StartPlayer Color ID}
