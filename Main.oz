@@ -3,7 +3,7 @@ import
    GUI
    Input
    PlayerManager
-   System(show:Show print:Print)
+   System(show:Show)
    OS
 define
     % iterates over ListPlayerTypes and creates a list of the corresponding players' ports

@@ -2,7 +2,7 @@ functor
 import
    Input
    OS
-   System(show:Show print:Print)
+   System(show:Show)
 export
    portPlayer:StartPlayer
 define
@@ -65,11 +65,11 @@ in
 			{TreatStream T IDPlayer Position Position|nil Input.maxDamage false LoadMine LoadMissile ListMine EPaths EIDs EFound}
 
 		[] move(?ID ?Position ?Direction)|T then
-			local
-				Dest = {IsEnnemyFound EPaths EFound}
-			in
+			%local
+			%	Dest = {IsEnnemyFound EPaths EFound}
+			%in
 				ID = IDPlayer
-				if Dest == nil then
+				%if Dest == nil then
 					local ListMove in
 						%collect the retrun list of function Move ( [direction position path IsDive] )
 						ListMove = {Move Pos Path IsDive}
@@ -80,12 +80,12 @@ in
 						%end
 						{TreatStream T IDPlayer ListMove.2.1 ListMove.2.2.1 Life ListMove.2.2.2.1 LoadMine LoadMissile ListMine EPaths EIDs EFound}
 					end
-				elseif {ContainsPt Path.2 Dest} then
+				%elseif {ContainsPt Path.2 Dest} then
 
-				else
+				%else
 					
-				end
-			end
+				%end
+			%end
 
 		[] dive|T then
 			{TreatStream T IDPlayer Pos Path Life true LoadMine LoadMissile ListMine EPaths EIDs EFound}
@@ -302,7 +302,7 @@ in
 					of null then
 						{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine NewEPaths EIDs EFound}
 					% found ennemy
-					[] pt(x:X y:Y) then
+					[] pt(x:_ y:_) then
 						NewEFound NewNewEPaths
 					in
 						%{Show IDPlayer#'Ennemy found'}
@@ -329,25 +329,7 @@ in
 			else
 				{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine (Direction|nil)|EPaths ID|EIDs false|EFound}
 			end
-		[] saySurface(ID)|T then
-			%TODO
-			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
-		[] sayCharge(ID KindItem)|T then
-			%TODO
-			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
-		[] sayMinePlaced(ID)|T then
-			%TODO
-			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
-		[] sayAnswerDrone(Drone ID Answer)|T then
-			%TODO
-			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
-		[] sayAnswerSonar(ID Answer)|T then
-			%TODO
-			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
-		[] sayDeath(ID)|T then
-			%TODO
-			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
-		[] sayDamageTaken(ID Damage LifeLeft)|T then
+		[] sayDeath(_)|T then
 			%TODO
 			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
 		%basic case
