@@ -59,7 +59,7 @@ in
 
 %%%% Description of the map %%%%
 
-   %Minimum and Maximun number of row/column
+/*   %Minimum and Maximun number of row/column
    RowMin = 5
    RowMax = 10
    ColMin = 5
@@ -93,8 +93,8 @@ in
 
 
    Map = {RowGenerator NRow}
-
-   /*NRow = 10
+*/
+   NRow = 10
    NColumn = 10
    Map = [[0 0 0 0 0 0 0 0 0 0]
 	  [0 0 0 0 0 0 0 0 0 0]
@@ -105,13 +105,13 @@ in
 	  [0 0 0 1 0 0 1 1 0 0]
 	  [0 0 1 1 0 0 1 0 0 0]
 	  [0 0 0 0 0 0 0 0 0 0]
-	  [0 0 0 0 0 0 0 0 0 0]]*/
+	  [0 0 0 0 0 0 0 0 0 0]]
 
 %%%% Players description %%%%
 
    NbPlayer = 3
-   Players = [player player player]
-   Colors = [red green blue]
+   Players = [player072random player]
+   Colors = [red green]
 
 %%%% Thinking parameters (only in simultaneous) %%%%
 
