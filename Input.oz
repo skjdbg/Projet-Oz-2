@@ -59,17 +59,25 @@ in
 
 %%%% Description of the map %%%%
 
+  %%%%%%% USER Preferences %%%%%%%%%
+
    %Minimum and Maximun number of row/column
    RowMin = 5
    RowMax = 10
    ColMin = 5
    ColMax = 10
+
+   %Percentage of island
+   PercentIsland = 10
+
+  %%%%%%%  End of USER Preferences %%%%%%%%%
+
+
    %Genrate random NRow and Ncolumn
    NRow = (({OS.rand} mod (RowMax - RowMin + 1)) + RowMin)
    NColumn = (({OS.rand} mod (ColMax - ColMin + 1)) + ColMin)
 
-   %Percentage of island
-   PercentIsland = 10
+   
 
    %Generate random Column
    fun{ColGenerator Col}
