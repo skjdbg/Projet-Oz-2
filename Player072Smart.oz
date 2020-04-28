@@ -35,17 +35,19 @@ define
 	IsEnnemyFound
 	NewWall
 	WallFun
+	Distance
+	RemoveNth
 in
-	% TODO
-	% Stream : 
+
+	% Stream :      stream by which the player knows what he can do
 	% IDPlayer : 	either null if we have been killed or our <id> ::= id(id:<IdNum> color:<Color>)
 	% Pos : 		our position pt(x:X y:Y)
 	% Path : 		list of positions since last surface
 	% Life : 		ammount of health left
 	% IsDive : 		true if underwater, false if not
-	% LoadMine : 	TODO
-	% LoadMissile : TODO
-	% ListMine : 	TODO
+	% LoadMine : 	represents the level of charge of the mine (between 0 and Input.mine included)
+	% LoadMissile : represents the level of charge of the mine (between 0 and Input.missile included)
+	% ListMine : 	List of the mines waiting to be triggered
 	% EPaths : 		list of the ennemies' paths. used to try and guess where they are. if an ennemy's position is known, contains only this position
 	%				EPaths ::=  <List <carddirection>> '|' <EPaths>
 	%							| <position> '|' <EPaths>
@@ -67,13 +69,25 @@ in
 			{TreatStream T IDPlayer Position Position|nil Input.maxDamage false LoadMine LoadMissile ListMine EPaths EIDs EFound}
 
 		[] move(?ID ?Position ?Direction)|T then
-			%TODO it sometimes makes weird moves that are not allowed ?
-			% =>they don't match with the wait it really moves.
+			% TODO sometimes goes back on it's tracks instead of going surface
+			%{Delay 500}
 			local
 				Dest = {IsEnnemyFound EPaths EFound}
 			in
 				ID = IDPlayer
 				if Dest == nil then
+					local ListMove in
+						%collect the retrun list of function Move ( [direction position path IsDive] )
+						ListMove = {Move Pos Path IsDive}
+						%dir and pos
+						Direction = ListMove.1
+						Position = ListMove.2.1
+
+						%end
+						{TreatStream T IDPlayer ListMove.2.1 ListMove.2.2.1 Life ListMove.2.2.2.1 LoadMine LoadMissile ListMine EPaths EIDs EFound}
+					end
+				elseif {Distance Pos Dest} =< 2 then
+					%TODO we are too close from the ennemy => move away instead of random
 					local ListMove in
 						%collect the retrun list of function Move ( [direction position path IsDive] )
 						ListMove = {Move Pos Path IsDive}
@@ -92,7 +106,6 @@ in
 					local 
 						Mapo = {MapToPortObject Input.map 1 1}
 						Return
-						ListMove
 						Pathy
 					in
 						{SetTileList Mapo Mapo}
@@ -172,7 +185,7 @@ in
 		[] fireItem(?ID ?KindFire)|T then
 			ID = IDPlayer
 
-			%no ready item
+			%no item ready
 			if (LoadMine \= Input.mine andthen LoadMissile \= Input.missile) then
 				KindFire = null
 				{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
@@ -355,9 +368,7 @@ in
 						%{Show IDPlayer#ID}
 						%{Show IDPlayer#ResultMatch}
 						%{Delay 5000}
-						%delay is to debug and see if it works TODO remove once checked
 						
-						%TODO replace path with position 
 						NewNewEPaths = {SetNth EPaths ResultMatch N}
 						%{Show IDPlayer#New}
 						NewEFound = {SetNth EFound true N}
@@ -375,9 +386,22 @@ in
 			else
 				{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine (Direction|nil)|EPaths ID|EIDs false|EFound}
 			end
-		[] sayDeath(_)|T then
-			%TODO
-			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
+		[] sayDeath(ID)|T then
+			N
+			NewEIDs
+			NewEPaths
+			NewEFound
+		in
+			if {ContainsAt EIDs ID 1 N} then
+				NewEIDs = {RemoveNth EIDs N}
+				NewEPaths = {RemoveNth EPaths N}
+				NewEFound = {RemoveNth EFound N}
+			else
+				NewEIDs = EIDs
+				NewEPaths = EPaths
+				NewEFound = EFound
+			end
+			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine NewEPaths NewEIDs NewEFound}
 		%basic case
 		[] _|T then
 			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
@@ -458,7 +482,6 @@ in
 		% if path fits in Map from given X and Y returns end position of path
 		% else return null
 		fun {CheckPath Map Path X Y}
-			%TODO: change name ? there are two functions with the same name
 			if {IsOcean Map X Y} then
 				case Path
 				of H|T then
@@ -517,6 +540,10 @@ in
 		{MatchToMapIn Map ReversedPath 1 1 null}
 	end
 	
+	fun {Distance Pos1 Pos2}
+		{Abs Pos1.x-Pos2.x} + {Abs Pos1.y-Pos2.y}
+	end
+
 	fun {IsOcean Map X Y}
 		if (X =< Input.nRow andthen X > 0 andthen Y > 0 andthen Y =< Input.nColumn ) then
 			{Nth {Nth Map X} Y} == 0
@@ -540,10 +567,26 @@ in
 		end
 	end
 
+	fun {RemoveNth L N}
+		if N > 1 then
+			case L
+			of H|T then
+				H|{RemoveNth T N-1}
+			else
+				nil
+			end
+		else
+			case L
+			of H|T then
+				T
+			else
+				nil
+			end
+		end
+	end
+
 	% prepends Dir to the Nth path
 	% Paths : list of paths
-	% N : TODO
-	% Dir : TODO
 	% Path : the updated path
 	fun {AddToNth Paths N Dir ?Path}
 		if N > 1 then
@@ -891,7 +934,7 @@ in
 		case Strema
 		of found|_ then
 			skip
-		[] H|T then
+		[] _|T then
 			{WallFun T}
 		end
 	end

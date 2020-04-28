@@ -74,7 +74,6 @@ define
    end
 
    proc {SkipTurn SWait PForward}
-      %TODO kill every thread once all is Done
       case SWait
       of H|T then
          if H \= 'end' then
@@ -125,7 +124,7 @@ define
                      {HandlePlayer T PForward Input.turnSurface-1 GUI EPL Port Synch}
                   else
                      IdCharge ItemKind
-                     IdFire FireKind PosMiss
+                     IdFire FireKind
                      IdMine Mine
                   in
                      {Broadcast EPL sayMove(Id Dir)}
@@ -226,8 +225,6 @@ define
       proc{TurnPlayer Port Synch}
 
          local Number in 
-
-            % TODO END when 1 player still alive
             {Send Synch nbAlive(Number)}
             {Wait Number}
             if (Number =< 1) then
@@ -285,7 +282,7 @@ define
                               {SimulateThink}
 
                               %9 Fire Item
-                              local IdFire FireKind PosMiss in
+                              local IdFire FireKind in
                                  {Send Port fireItem(IdFire FireKind)}
                                  {Wait IdFire}
                                  if (IdFire == null) then
