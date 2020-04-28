@@ -308,7 +308,7 @@ in
 						%{Show IDPlayer#'Ennemy found'}
 						{Show IDPlayer#ID}
 						{Show IDPlayer#ResultMatch}
-						{Delay 5000}
+						%{Delay 5000}
 						%delay is to debug and see if it works TODO remove once checked
 						
 						%TODO replace path with position 
