@@ -1,6 +1,7 @@
 functor
 import
    OS
+   Sytem(show:Show)
 export
    isTurnByTurn:IsTurnByTurn
    nRow:NRow
@@ -28,6 +29,7 @@ define
    NColumn
    Map
    NbPlayer
+   NbColors
    Players
    Colors
    ThinkMin
@@ -55,7 +57,7 @@ in
 
 %%%% Style of game %%%%
 
-   IsTurnByTurn = false
+   IsTurnByTurn = true
 
 %%%% Description of the map %%%%
 
@@ -117,9 +119,13 @@ in
 
 %%%% Players description %%%%
 
-   Players = [player072random player072smart]
+   Players = [player072random player072smart player]
    NbPlayer = {Length Players}
-   Colors = [red green]
+   Colors = [red c(220 0 255) c(100 155 0)]
+   NbColors = {Length Colors}
+   if NbColors \= NbPlayer then
+      {Show "Player Description incorrect"}
+   end
 
 %%%% Thinking parameters (only in simultaneous) %%%%
 
