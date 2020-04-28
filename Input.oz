@@ -53,11 +53,13 @@ define
    ColGenerator
    RowGenerator
    PercentIsland
+   ColorGenerator
+   RandomColor
 in
 
 %%%% Style of game %%%%
 
-   IsTurnByTurn = true
+   IsTurnByTurn = false
 
 %%%% Description of the map %%%%
 
@@ -117,15 +119,32 @@ in
 	  [0 0 0 0 0 0 0 0 0 0]
 	  [0 0 0 0 0 0 0 0 0 0]]  */
 
+
+%%%%% FUN COLOR GENRATOR %%%%%
+fun{ColorGenerator NPlayer}
+   if NPlayer == 0 then
+      nil
+   else
+      c({RandomColor} {RandomColor} {RandomColor})|{ColorGenerator NPlayer-1}
+   end
+end
+
+fun{RandomColor}
+   {OS.rand} mod 255
+end
+
+
 %%%% Players description %%%%
 
    Players = [player072smart player player]
    NbPlayer = {Length Players}
-   Colors = [red c(220 0 255) c(100 155 0)]
+   Colors = {ColorGenerator NbPlayer}
    NbColors = {Length Colors}
    if NbColors \= NbPlayer then
       {Show "Player Description incorrect"}
    end
+
+
 
 %%%% Thinking parameters (only in simultaneous) %%%%
 

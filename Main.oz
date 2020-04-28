@@ -224,6 +224,8 @@ define
       %Proc to plays player's turn
       proc{TurnPlayer Port Synch}
 
+
+         %Check if the player is alone (for ENDGAME)
          local Number in 
             {Send Synch nbAlive(Number)}
             {Wait Number}
@@ -346,7 +348,7 @@ define
    in
       %{NewPort StreamSync Sync}
       Sync = {FunSync}
-      {List.forAll EPL (proc{$ Port} thread {TurnPlayer Port Sync} end end)}
+      {ForAll EPL (proc{$ Port} thread {TurnPlayer Port Sync} end end)}
       %{WaitForN Input.nbPlayer-1 StreamSync} % we wait for exactly 1 winner (more precisely 1 or less)
    end
 
