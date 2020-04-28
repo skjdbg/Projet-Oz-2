@@ -67,72 +67,18 @@ in
 			{TreatStream T IDPlayer Position Position|nil Input.maxDamage false LoadMine LoadMissile ListMine EPaths EIDs EFound}
 
 		[] move(?ID ?Position ?Direction)|T then
-			%TODO it sometimes makes weird moves that are not allowed ?
-			% =>they don't match with the wait it really moves.
-			local
-				Dest = {IsEnnemyFound EPaths EFound}
-			in
-				ID = IDPlayer
-				if Dest == nil then
-					local ListMove in
-						%collect the retrun list of function Move ( [direction position path IsDive] )
-						ListMove = {Move Pos Path IsDive}
-						%dir and pos
-						Direction = ListMove.1
-						Position = ListMove.2.1
+			ID = IDPlayer
+			
+			local ListMove in
+				%collect the retrun list of function Move ( [direction position path IsDive] )
+				ListMove = {Move Pos Path IsDive}
+				%dir and pos
+				Direction = ListMove.1
+				Position = ListMove.2.1
 
-						%end
-						{TreatStream T IDPlayer ListMove.2.1 ListMove.2.2.1 Life ListMove.2.2.2.1 LoadMine LoadMissile ListMine EPaths EIDs EFound}
-					end
-				elseif {ContainsPt Path.2 Dest} then
-					Position = Pos
-					Direction = surface
-					{TreatStream T IDPlayer Pos Pos|nil Life false LoadMine LoadMissile ListMine EPaths EIDs EFound}
-				else
-					local 
-						Mapo = {MapToPortObject Input.map 1 1}
-						Return
-						ListMove
-						Pathy
-					in
-						{SetTileList Mapo Mapo}
-
-						{Send {Nth {Nth Mapo Dest.x} Dest.y} setAsDest(Return)}
-						{Send {Nth {Nth Mapo Pos.x} Pos.y} sayCost(0 nil)}
-						{Wait Return}
-						%if Dest == Origin
-						if Return == nil orelse Return.2 == nil then
-							local ListMove in
-								%collect the retrun list of function Move ( [direction position path IsDive] )
-								ListMove = {Move Pos Path IsDive}
-								%dir and pos
-								Direction = ListMove.1
-								Position = ListMove.2.1
-
-								%end
-								{TreatStream T IDPlayer ListMove.2.1 ListMove.2.2.1 Life ListMove.2.2.2.1 LoadMine LoadMissile ListMine EPaths EIDs EFound}
-							end
-						else
-
-							Pathy = {InsideOut Return nil}
-							Position = Pathy.2.1
-							Direction = {PosToDir Pos Position}
-
-							{TreatStream T IDPlayer Position Position|Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
-						
-							/*%collect the retrun list of function Move ( [direction position path IsDive] )
-							ListMove = {Move Pos Path IsDive}
-							%dir and pos
-							Direction = ListMove.1
-							Position = ListMove.2.1
-
-							%end
-							{TreatStream T IDPlayer ListMove.2.1 ListMove.2.2.1 Life ListMove.2.2.2.1 LoadMine LoadMissile ListMine EPaths EIDs EFound}*/
-						end
-					end
-				end
+				%end
+				{TreatStream T IDPlayer ListMove.2.1 ListMove.2.2.1 Life ListMove.2.2.2.1 LoadMine LoadMissile ListMine EPaths EIDs EFound}
 			end
-
 		[] dive|T then
 			{TreatStream T IDPlayer Pos Path Life true LoadMine LoadMissile ListMine EPaths EIDs EFound}
 
@@ -335,7 +281,7 @@ in
 				% if position is already certain, update it
 				if {Nth EFound N} == true then
 					NewEPaths = {MoveNthInDir EPaths N Direction}
-					%{Delay 20000}
+					%{Delay 5000}
 					{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine NewEPaths EIDs EFound}
 				%if position uncertain, add to path and try to pinpoint ennemy
 				else
@@ -352,8 +298,8 @@ in
 						NewEFound NewNewEPaths
 					in
 						%{Show IDPlayer#'Ennemy found'}
-						%{Show IDPlayer#ID}
-						%{Show IDPlayer#ResultMatch}
+						{Show IDPlayer#ID}
+						{Show IDPlayer#ResultMatch}
 						%{Delay 5000}
 						%delay is to debug and see if it works TODO remove once checked
 						
@@ -497,6 +443,7 @@ in
 				null
 			end
 		end
+
 		fun {MatchToMapIn Map Path X Y PathFound}
 			NewPathFound
 		in
@@ -587,9 +534,11 @@ in
 	end
 	% {Browse {AddToNth [nil north|east|nil north|nil] 2 east}}
 
+
 	% updates the Nth position in Dir direction
 	% does nothing if N is bigger than {Length Paths}
 	% if N < 1 behaves as if N = 1
+
 	fun {MoveNthInDir Paths N Dir}
 		if N > 1 then
 			case Paths
@@ -604,12 +553,16 @@ in
 			of H|T then
 				case Dir
 				of east then
+					{Show pt(x:H.x y:H.y+1)}
 					pt(x:H.x y:H.y+1)|T
 				[] west then
+					{Show pt(x:H.x y:H.y-1)}
 					pt(x:H.x y:H.y-1)|T
 				[] north then
+					{Show pt(x:H.x-1 y:H.y)}
 					pt(x:H.x-1 y:H.y)|T
 				[] south then
+					{Show pt(x:H.x+1 y:H.y)}
 					pt(x:H.x+1 y:H.y)|T
 				end
 			% should probably never happen
@@ -908,6 +861,7 @@ in
 	proc {WallFun Strema}
 		case Strema
 		of found|_ then
+		{Show wall}
 			skip
 		[] H|T then
 			{WallFun T}

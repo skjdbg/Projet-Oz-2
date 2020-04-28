@@ -73,7 +73,7 @@ in
   %%%%%%%  End of USER Preferences %%%%%%%%%
 
 
-   %Genrate random NRow and Ncolumn
+/*   %Genrate random NRow and Ncolumn
    NRow = (({OS.rand} mod (RowMax - RowMin + 1)) + RowMin)
    NColumn = (({OS.rand} mod (ColMax - ColMin + 1)) + ColMin)
 
@@ -101,8 +101,8 @@ in
 
 
    Map = {RowGenerator NRow}
-
-   /*NRow = 10
+*/
+   NRow = 10
    NColumn = 10
    Map = [[0 0 0 0 0 0 0 0 0 0]
 	  [0 0 0 0 0 0 0 0 0 0]
@@ -113,13 +113,13 @@ in
 	  [0 0 0 1 0 0 1 1 0 0]
 	  [0 0 1 1 0 0 1 0 0 0]
 	  [0 0 0 0 0 0 0 0 0 0]
-	  [0 0 0 0 0 0 0 0 0 0]]*/
+	  [0 0 0 0 0 0 0 0 0 0]]
 
 %%%% Players description %%%%
 
-   NbPlayer = 3
-   Players = [player072smart player072smart player072smart]
-   Colors = [red green blue]
+   NbPlayer = 2
+   Players = [player072tracker player072smart]
+   Colors = [red green]
 
 %%%% Thinking parameters (only in simultaneous) %%%%
 
