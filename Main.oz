@@ -409,8 +409,6 @@ define
       of P|T then
          Ans
       in
-         %TODO ce show fait des trucs bizares avec player072random je pense
-         %{Show P}
          {Send P sayMissileExplode(Id MissPos Ans)}
          {Wait Ans}
          case Ans
@@ -468,8 +466,8 @@ define
       of P|T then
 	      Ans
       in
-      {Send P sayMineExplode(Id MinePos Ans)}
-      {Wait Ans}
+         {Send P sayMineExplode(Id MinePos Ans)}
+         {Wait Ans}
 	      case Ans
 	      of sayDeath(Id) then
             {Broadcast PL Ans}
