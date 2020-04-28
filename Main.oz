@@ -350,7 +350,7 @@ define
       %{WaitForN Input.nbPlayer-1 StreamSync} % we wait for exactly 1 winner (more precisely 1 or less)
    end
 
-   %proc for FunSync
+   %proc for FunSync (check if the player is alone --> ENDGAME)
    proc{TreatStreamSync Stream NbAlivePlayer}
 		case Stream of playerDead|T then
          {TreatStreamSync T NbAlivePlayer-1}
@@ -362,7 +362,7 @@ define
       end
    end
 
-   %proc to decide when player win (when is he alone in the map)
+   %proc Port Object to decide when player win (when is he alone in the map)
    fun{FunSync}
 		Stream
 		Port
