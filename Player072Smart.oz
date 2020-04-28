@@ -73,7 +73,7 @@ in
 				Dest = {IsEnnemyFound EPaths EFound}
 			in
 				ID = IDPlayer
-				%if Dest == nil then
+				if Dest == nil then
 					local ListMove in
 						%collect the retrun list of function Move ( [direction position path IsDive] )
 						ListMove = {Move Pos Path IsDive}
