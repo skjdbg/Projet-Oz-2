@@ -29,7 +29,6 @@ define
    NColumn
    Map
    NbPlayer
-   NbColors
    Players
    Colors
    ThinkMin
@@ -152,14 +151,9 @@ end
    NbPlayer = {Length Players}
 
    % each random will be converted to a random color
-   UserColors = [red blue random c(100 155 0)]
+   UserColors = [red blue c(200 19 82) random random]
 
    Colors = {ConvertColors UserColors}
-   NbColors = {Length Colors}
-   if NbColors \= NbPlayer then
-      {Show "Player Description incorrect"}
-      {Show "The number of Players and Colors must be equal"}
-   end
 
 
 
