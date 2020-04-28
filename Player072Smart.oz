@@ -70,15 +70,11 @@ in
 			{TreatStream T IDPlayer Position Position|nil Input.maxDamage false LoadMine LoadMissile ListMine EPaths EIDs EFound}
 
 		[] move(?ID ?Position ?Direction)|T then
-			% TODO sometimes goes back on it's tracks instead of going surface
-			{Show Path}
-			{Delay 500}
 			local
 				Dest = {IsEnnemyFound EPaths EFound}
 			in
 				ID = IDPlayer
 				if Dest == nil then
-					{Show 1}
 					local ListMove in
 						%collect the retrun list of function Move ( [direction position path IsDive] )
 						ListMove = {Move Pos Path IsDive}
@@ -90,7 +86,6 @@ in
 						{TreatStream T IDPlayer ListMove.2.1 ListMove.2.2.1 Life ListMove.2.2.2.1 LoadMine LoadMissile ListMine EPaths EIDs EFound}
 					end
 				elseif {Distance Pos Dest} =< 2 then
-					{Show 2}
 					%TODO we are too close from the ennemy => move away instead of random
 					local ListMove in
 						%collect the retrun list of function Move ( [direction position path IsDive] )
@@ -103,7 +98,6 @@ in
 						{TreatStream T IDPlayer ListMove.2.1 ListMove.2.2.1 Life ListMove.2.2.2.1 LoadMine LoadMissile ListMine EPaths EIDs EFound}
 					end
 				else
-					{Show 4}
 					local 
 						Mapo = {MapToPortObject Input.map 1 1}
 						Return
@@ -114,11 +108,9 @@ in
 						{Send {Nth {Nth Mapo Dest.x} Dest.y} setAsDest(Return)}
 						{Send {Nth {Nth Mapo Pos.x} Pos.y} sayCost(0 nil)}
 						{Wait Return}
-						{Show Return}
 						Pathy = {InsideOut Return nil}
 						%if Dest == Origin
 						if Return == nil orelse Return.2 == nil then
-							{Show 5}
 							local ListMove in
 								%collect the retrun list of function Move ( [direction position path IsDive] )
 								ListMove = {Move Pos Path IsDive}
@@ -130,13 +122,10 @@ in
 								{TreatStream T IDPlayer ListMove.2.1 ListMove.2.2.1 Life ListMove.2.2.2.1 LoadMine LoadMissile ListMine EPaths EIDs EFound}
 							end
 						elseif {ContainsPt Path.2 Pathy.2.1} then
-							{Show 3}
-							{Show Dest}
 							Position = Pos
 							Direction = surface
 							{TreatStream T IDPlayer Pos Pos|nil Life false LoadMine LoadMissile ListMine EPaths EIDs EFound}
 						else
-							{Show b}
 							Position = Pathy.2.1
 							Direction = {PosToDir Pos Position}
 
@@ -362,6 +351,7 @@ in
 						{Show IDPlayer#'No possible Match, reset'}
 
 						% TODO: reset this path
+						% not necessary since this case should only be used in case of something else bugging
 						{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine NewEPaths EIDs EFound}
 					end
 				end

@@ -213,12 +213,22 @@ define
       PortList = {MakeUnboundList Input.nbPlayer nil}
       StreamList = {MakeStreamList PortList nil nil 0}
       {LaunchPlayers StreamList PortList GUI EPL EPL {NewPort StreamSync}}
-      {Send PortList.1 unit}
+      {Send {Last PortList} unit}
       {WaitForN Input.nbPlayer-1 StreamSync} % we wait for exactly 1 winner (more precisely 1 or less)
       {Broadcast PortList 'end'} % shuts down every thread
       {Show 'Game Over'}
    end
 
+   fun {Last L}
+      case L
+      of H|nil then
+         H
+      [] _|T then
+         {Last T}
+      else
+         nil
+      end
+   end
 
    proc {RunSimultaneous EPL GUI}
       %Proc to plays player's turn

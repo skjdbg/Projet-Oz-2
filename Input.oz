@@ -60,7 +60,7 @@ in
 
 %%%% Style of game %%%%
 
-   IsTurnByTurn = false
+   IsTurnByTurn = true
 
 %%%% Description of the map %%%%
 
@@ -147,11 +147,11 @@ end
 
 %%%% Players description %%%%
 
-   Players = [player072smart player player player]
+   Players = [player072smart player072smart player072smart player072smart]
    NbPlayer = {Length Players}
 
    % each random will be converted to a random color
-   UserColors = [red blue c(200 19 82) random random]
+   UserColors = [green blue c(200 19 82) random]
 
    Colors = {ConvertColors UserColors}
 
