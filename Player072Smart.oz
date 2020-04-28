@@ -352,13 +352,8 @@ in
 						NewEFound NewNewEPaths
 					in
 						%{Show IDPlayer#'Ennemy found'}
-<<<<<<< HEAD
-						{Show IDPlayer#ID}
-						{Show IDPlayer#ResultMatch}
-=======
 						%{Show IDPlayer#ID}
 						%{Show IDPlayer#ResultMatch}
->>>>>>> 4d01eee66af9ad4b5ebd158aca3962c040bea22b
 						%{Delay 5000}
 						%delay is to debug and see if it works TODO remove once checked
 						
