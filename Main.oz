@@ -413,7 +413,7 @@ define
          Ans
       in
          %TODO ce show fait des trucs bizares avec player072random je pense
-         {Show P}
+         %{Show P}
          {Send P sayMissileExplode(Id MissPos Ans)}
          {Wait Ans}
          case Ans
