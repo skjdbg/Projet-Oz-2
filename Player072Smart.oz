@@ -37,6 +37,7 @@ define
 	WallFun
 	Distance
 	RemoveNth
+	IsInRange
 in
 
 	% Stream :      stream by which the player knows what he can do
@@ -183,10 +184,15 @@ in
 			end
 		
 		[] fireItem(?ID ?KindFire)|T then
+			Target = {IsEnnemyFound EPaths EFound}
+		in
 			ID = IDPlayer
 
-			%no item ready
-			if (LoadMine \= Input.mine andthen LoadMissile \= Input.missile) then
+			% if a missile is ready and an ennemy can be hit, Fire
+			if LoadMissile == Input.missile andthen {IsInRange Target Pos} then
+				KindFire = missile(Target)
+				{TreatStream T IDPlayer Pos Path Life IsDive LoadMine 0 ListMine EPaths EIDs EFound}
+			elseif LoadMine \= Input.mine then
 				KindFire = null
 				{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
 			else
@@ -194,48 +200,17 @@ in
 					%All pos in the map
 					PosMatrix = {AllPosition Input.nRow Input.nColumn Input.nColumn}
 					
-					%choose random item
-					if (LoadMine == Input.mine andthen LoadMissile == Input.missile) then
-						KindItem = {Nth [mine missile] (({OS.rand} mod 2) +1)}
-						%random is mine
-						case KindItem 
-						of mine then
-							CorrectPos = {ValidPosItem PosMatrix Pos Input.minDistanceMine Input.maxDistanceMine}
-							RandomPos = {Nth CorrectPos (({OS.rand} mod {Length CorrectPos}) +1)}
-							KindFire = mine(RandomPos)
-							{TreatStream T IDPlayer Pos Path Life IsDive 0 LoadMissile RandomPos|ListMine EPaths EIDs EFound}
-
-						%random is missile
-						[] missile then
-							%no suicide
-							if Input.minDistanceMissile >= 2 then
-								CorrectPos = {ValidPosItem PosMatrix Pos Input.minDistanceMissile Input.maxDistanceMissile}
-							else
-								CorrectPos = {ValidPosItem PosMatrix Pos 2 Input.maxDistanceMissile}
-							end
-							RandomPos = {Nth CorrectPos (({OS.rand} mod {Length CorrectPos}) +1)}
-							KindFire = missile(RandomPos)
-							{TreatStream T IDPlayer Pos Path Life IsDive LoadMine 0 ListMine EPaths EIDs EFound}
-						end
-
-					%fire mine
-					elseif (LoadMine == Input.mine) then
+					% if mine can be launched then lauch them
+					if (LoadMine == Input.mine) then
 						CorrectPos = {ValidPosItem PosMatrix Pos Input.minDistanceMine Input.maxDistanceMine}
 						RandomPos = {Nth CorrectPos (({OS.rand} mod {Length CorrectPos}) +1)}
 						KindFire = mine(RandomPos)
 						{TreatStream T IDPlayer Pos Path Life IsDive 0 LoadMissile RandomPos|ListMine EPaths EIDs EFound}
 
-					%fire missile
+					% do nothing
 					else
-						%no suicide
-						if Input.minDistanceMissile >= 2 then
-							CorrectPos = {ValidPosItem PosMatrix Pos Input.minDistanceMissile Input.maxDistanceMissile}
-						else
-							CorrectPos = {ValidPosItem PosMatrix Pos 2 Input.maxDistanceMissile}
-						end
-						RandomPos = {Nth CorrectPos (({OS.rand} mod {Length CorrectPos}) +1)}
-						KindFire = missile(RandomPos)
-						{TreatStream T IDPlayer Pos Path Life IsDive LoadMine 0 ListMine EPaths EIDs EFound}
+						KindFire = null
+						{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
 					end
 				end
 			end
@@ -407,6 +382,21 @@ in
 			{TreatStream T IDPlayer Pos Path Life IsDive LoadMine LoadMissile ListMine EPaths EIDs EFound}
 		end
 		
+	end
+
+	fun {IsInRange Target Pos}
+		Dist
+	in
+		if Target == nil orelse Pos == nil then
+			false
+		else
+			Dist = {Distance Target Pos}
+			if Dist < 2 orelse Dist > Input.maxDistanceMissile orelse Dist < Input.minDistanceMissile then
+				false
+			else
+				true
+			end
+		end
 	end
 
 	fun {IsEnnemyFound PosL FoundL}
@@ -814,6 +804,8 @@ in
 	%%%%%%%%%%%%%%%%%
 	%% PathFinding %%
 	%%%%%%%%%%%%%%%%%
+
+	% TODO if map separated in two can't converge and crashes
 
 	proc {SetTileList LL Acc}
 		proc {SetTileListIn LL Acc}
