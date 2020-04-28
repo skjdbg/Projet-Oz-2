@@ -1,7 +1,7 @@
 functor
 import
    OS
-   Sytem(show:Show)
+   System(show:Show)
 export
    isTurnByTurn:IsTurnByTurn
    nRow:NRow
@@ -56,6 +56,7 @@ define
    %ColorGenerator
    RandomColor
    ConvertColors
+   UserColors
 in
 
 %%%% Style of game %%%%
@@ -138,6 +139,8 @@ fun {ConvertColors L}
    case L
    of random|T then
       c({RandomColor} {RandomColor} {RandomColor})|{ConvertColors T}
+   [] H|T then
+      H|{ConvertColors T}
    else
       nil
    end
@@ -145,7 +148,7 @@ end
 
 %%%% Players description %%%%
 
-   Players = [player072smart player player]
+   Players = [player072smart player player player]
    NbPlayer = {Length Players}
 
    % each random will be converted to a random color
