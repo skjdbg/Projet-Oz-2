@@ -53,8 +53,9 @@ define
    ColGenerator
    RowGenerator
    PercentIsland
-   ColorGenerator
+   %ColorGenerator
    RandomColor
+   ConvertColors
 in
 
 %%%% Style of game %%%%
@@ -121,27 +122,40 @@ in
 
 
 %%%%% FUN COLOR GENRATOR %%%%%
-fun{ColorGenerator NPlayer}
+/*fun{ColorGenerator NPlayer}
    if NPlayer == 0 then
       nil
    else
       c({RandomColor} {RandomColor} {RandomColor})|{ColorGenerator NPlayer-1}
    end
-end
+end*/
 
 fun{RandomColor}
-   {OS.rand} mod 255
+   {OS.rand} mod 256
 end
 
+fun {ConvertColors L}
+   case L
+   of random|T then
+      c({RandomColor} {RandomColor} {RandomColor})|{ConvertColors T}
+   else
+      nil
+   end
+end
 
 %%%% Players description %%%%
 
    Players = [player072smart player player]
    NbPlayer = {Length Players}
-   Colors = {ColorGenerator NbPlayer}
+
+   % each random will be converted to a random color
+   UserColors = [red blue random c(100 155 0)]
+
+   Colors = {ConvertColors UserColors}
    NbColors = {Length Colors}
    if NbColors \= NbPlayer then
       {Show "Player Description incorrect"}
+      {Show "The number of Players and Colors must be equal"}
    end
 
 
