@@ -119,7 +119,7 @@ in
 
 %%%% Players description %%%%
 
-   Players = [player player player]
+   Players = [player072smart player player]
    NbPlayer = {Length Players}
    Colors = [red c(220 0 255) c(100 155 0)]
    NbColors = {Length Colors}
