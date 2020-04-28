@@ -391,7 +391,7 @@ in
 			false
 		else
 			Dist = {Distance Target Pos}
-			if Dist < 2 orelse Dist > Input.maxDistanceMissile orelse Dist < Input.minDistanceMissile then
+			if {Abs Target.x-Pos.x} < 2 orelse {Abs Target.y-Pos.y} < 2 orelse Dist > Input.maxDistanceMissile orelse Dist < Input.minDistanceMissile then
 				false
 			else
 				true
